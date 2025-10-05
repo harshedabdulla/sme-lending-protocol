@@ -3,7 +3,15 @@ const hre = require("hardhat");
 async function main() {
   console.log("Deploying contracts to network:", hre.network.name);
 
-  // Add your deployment logic here
+  const [deployer] = await hre.ethers.getSigners();
+  console.log("Deploying with account:", deployer.address);
+
+  const MockUSDT = await hre.ethers.getContractFactory("MockUSDT");
+  const mockUSDT = await MockUSDT.deploy();
+  await mockUSDT.waitForDeployment();
+
+  const address = await mockUSDT.getAddress();
+  console.log("MockUSDT deployed to:", address);
 }
 
 main()
