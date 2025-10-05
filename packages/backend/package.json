@@ -1,0 +1,21 @@
+{
+  "name": "@sme-lending/backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "build": "echo 'No build step needed for Node.js'",
+    "start": "node src/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.8.0",
+    "fastify": "^4.25.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "prisma": "^5.8.0"
+  }
+}
