@@ -5,13 +5,18 @@ async function main() {
 
   const [deployer] = await hre.ethers.getSigners();
   console.log("Deploying with account:", deployer.address);
+  console.log("Account balance:", (await hre.ethers.provider.getBalance(deployer.address)).toString());
 
-  const MockUSDT = await hre.ethers.getContractFactory("MockUSDT");
-  const mockUSDT = await MockUSDT.deploy();
-  await mockUSDT.waitForDeployment();
+  // Deploy CreditScore
+  console.log("\nDeploying CreditScore...");
+  const CreditScore = await hre.ethers.getContractFactory("CreditScore");
+  const creditScore = await CreditScore.deploy(deployer.address); // deployer is initial oracle
+  await creditScore.waitForDeployment();
+  const creditScoreAddress = await creditScore.getAddress();
+  console.log("CreditScore deployed to:", creditScoreAddress);
 
-  const address = await mockUSDT.getAddress();
-  console.log("MockUSDT deployed to:", address);
+  console.log("CreditScore:", creditScoreAddress);
+  console.log("Oracle:", deployer.address);
 }
 
 main()
