@@ -18,5 +18,11 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
-  }
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0"
+  },
+  "nohoist": [
+    "**/contracts/@openzeppelin/**"
+  ]
 }
