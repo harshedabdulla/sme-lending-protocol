@@ -20,11 +20,9 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-// import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-//ReentrancyGuard is removed to avoid dependency issues. Ensure no reentrancy vulnerabilities exist.
-
-contract LendingPool is Ownable {
+contract LendingPool is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     //The stablecoin used for deposits and loans (e.g., MockUSDT)
@@ -87,9 +85,8 @@ contract LendingPool is Ownable {
     /**
      *  Deposit stablecoins into the pool.
      *  Amount of tokens to deposit
-     *external nonReentrant
      */
-    function deposit(uint256 amount) external {
+    function deposit(uint256 amount) external nonReentrant {
         require(amount > 0, "Amount must be > 0");
         stablecoin.safeTransferFrom(msg.sender, address(this), amount);
 
@@ -101,10 +98,9 @@ contract LendingPool is Ownable {
 
     /**
      *  Withdraw available liquidity (not currently lent out).
-     *  external nonReentrant
      *  Amount to withdraw
      */
-    function withdraw(uint256 amount) external {
+    function withdraw(uint256 amount) external nonReentrant {
         require(amount > 0, "Amount must be > 0");
         require(deposits[msg.sender] >= amount, "Insufficient balance");
 
@@ -124,13 +120,13 @@ contract LendingPool is Ownable {
 
     /**
      *  LoanManager disburses loan to borrower.
-     *  Address of borrower //nonReentrant
+     *  Address of borrower
      *  Loan amount to disburse
      */
     function disburseLoan(
         address borrower,
         uint256 amount
-    ) external onlyLoanManager {
+    ) external onlyLoanManager nonReentrant {
         require(borrower != address(0), "Invalid borrower");
         require(amount > 0, "Invalid amount");
         require(
@@ -148,10 +144,10 @@ contract LendingPool is Ownable {
 
     /**
      *  Borrower (or anyone) repays part/all of a loan.
-     *  Borrower's address// nonReentrant
+     *  Borrower's address
      *  Repayment amount
      */
-    function receiveRepayment(address borrower, uint256 amount) external {
+    function receiveRepayment(address borrower, uint256 amount) external nonReentrant {
         require(borrower != address(0), "Invalid borrower");
         require(amount > 0, "Invalid amount");
         require(loans[borrower] >= amount, "Repay exceeds loan");
