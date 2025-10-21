@@ -10,8 +10,8 @@ export default function YieldPool() {
   const [withdrawShares, setWithdrawShares] = useState('');
   const [activeTab, setActiveTab] = useState('deposit');
 
-  const { writeContract, data: hash } = useWriteContract();
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
   const { data, isLoading } = useReadContracts({
     contracts: [
@@ -61,12 +61,22 @@ export default function YieldPool() {
   });
 
   const tvl = data?.[0]?.result ? formatUnits(data[0].result, 6) : '0';
-  const userShares = data?.[1]?.result ? formatUnits(data[1].result, 18) : '0';
+  const userShares = data?.[1]?.result ? formatUnits(data[1].result, 6) : '0'; // Shares use 6 decimals, not 18
   const userBalance = data?.[2]?.result ? formatUnits(data[2].result, 6) : '0';
-  const withdrawalRequest = data?.[3]?.result || { shares: 0n, requestTime: 0n };
+  const withdrawalRequestRaw = data?.[3]?.result;
+  const withdrawalRequest = withdrawalRequestRaw
+    ? { shares: withdrawalRequestRaw[0] || 0n, requestTime: withdrawalRequestRaw[1] || 0n }
+    : { shares: 0n, requestTime: 0n };
   const canWithdraw = data?.[4]?.result ?? false;
   const usdtBalance = data?.[5]?.result ? formatUnits(data[5].result, 6) : '0';
   const allowance = data?.[6]?.result || 0n;
+
+  // Debug logging
+  console.log('🔍 Withdrawal Request Debug:');
+  console.log('  Raw data[3]:', data?.[3]);
+  console.log('  Parsed withdrawalRequest:', withdrawalRequest);
+  console.log('  Shares:', withdrawalRequest.shares.toString());
+  console.log('  Request Time:', withdrawalRequest.requestTime.toString());
 
   const handleApprove = async () => {
     try {
@@ -75,6 +85,7 @@ export default function YieldPool() {
         abi: ABIS.mockUSDT,
         functionName: 'approve',
         args: [CONTRACTS.sepolia.yieldingPool, parseUnits('1000000', 6)],
+        gas: 100000n,
       });
     } catch (error) {
       console.error('Error approving:', error);
@@ -84,12 +95,18 @@ export default function YieldPool() {
   const handleDeposit = async () => {
     if (!depositAmount) return;
 
+    console.log('💰 Deposit Debug:');
+    console.log('  Amount:', depositAmount);
+    console.log('  Parsed:', parseUnits(depositAmount, 6));
+    console.log('  Contract:', CONTRACTS.sepolia.yieldingPool);
+
     try {
       writeContract({
         address: CONTRACTS.sepolia.yieldingPool,
         abi: ABIS.yieldingPool,
         functionName: 'deposit',
         args: [parseUnits(depositAmount, 6)],
+        gas: 500000n,
       });
       setDepositAmount('');
     } catch (error) {
@@ -105,7 +122,8 @@ export default function YieldPool() {
         address: CONTRACTS.sepolia.yieldingPool,
         abi: ABIS.yieldingPool,
         functionName: 'requestWithdrawal',
-        args: [parseUnits(withdrawShares, 18)],
+        args: [parseUnits(withdrawShares, 6)], // Shares use 6 decimals
+        gas: 300000n,
       });
       setWithdrawShares('');
     } catch (error) {
@@ -119,6 +137,7 @@ export default function YieldPool() {
         address: CONTRACTS.sepolia.yieldingPool,
         abi: ABIS.yieldingPool,
         functionName: 'withdraw',
+        gas: 300000n,
       });
     } catch (error) {
       console.error('Error withdrawing:', error);
@@ -250,13 +269,48 @@ export default function YieldPool() {
                     {isConfirming ? 'Approving...' : 'Approve USDT'}
                   </button>
                 ) : (
-                  <button
-                    onClick={handleDeposit}
-                    disabled={!depositAmount || isConfirming}
-                    className="w-full btn-primary"
-                  >
-                    {isConfirming ? 'Depositing...' : 'Deposit to Pool'}
-                  </button>
+                  <div className="space-y-3">
+                    <button
+                      onClick={handleDeposit}
+                      disabled={!depositAmount || isPending || isConfirming}
+                      className="w-full btn-primary"
+                    >
+                      {isPending && 'Waiting for signature...'}
+                      {isConfirming && 'Confirming...'}
+                      {!isPending && !isConfirming && 'Deposit to Pool'}
+                    </button>
+
+                    {hash && (
+                      <div className="text-center space-y-2">
+                        {isConfirming && (
+                          <p className="text-sm text-amber-400">
+                            ⏳ Transaction submitted, waiting for confirmation...
+                          </p>
+                        )}
+                        {isConfirmed && (
+                          <p className="text-sm text-emerald-400">
+                            ✅ Deposit successful!
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-600 font-mono">
+                          <a
+                            href={`https://sepolia.etherscan.io/tx/${hash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-blue-400"
+                          >
+                            View on Etherscan ↗
+                          </a>
+                        </p>
+                      </div>
+                    )}
+
+                    {error && (
+                      <p className="text-sm text-center text-red-400">
+                        ❌ Error: {error.message}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             ) : (
@@ -271,7 +325,7 @@ export default function YieldPool() {
                           Pending Withdrawal
                         </h4>
                         <p className="text-xs text-gray-400 font-mono mb-3">
-                          Shares: {formatUnits(withdrawalRequest.shares, 18)}
+                          Shares: {formatUnits(withdrawalRequest.shares, 6)}
                         </p>
                         {canWithdraw ? (
                           <button
@@ -297,21 +351,21 @@ export default function YieldPool() {
                       Withdraw Shares
                     </label>
                     <span className="text-xs text-gray-600 font-mono">
-                      Shares: {parseFloat(userShares).toFixed(2)}
+                      Available: {parseFloat(userShares).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
                   <input
                     type="number"
                     value={withdrawShares}
                     onChange={(e) => setWithdrawShares(e.target.value)}
-                    placeholder="100"
+                    placeholder="5000"
                     className="input"
                   />
                   <button
                     onClick={() => setWithdrawShares(userShares)}
                     className="text-xs text-blue-400 hover:text-blue-300 mt-2 transition-colors"
                   >
-                    Max
+                    Max ({parseFloat(userShares).toFixed(2)} shares)
                   </button>
                 </div>
 

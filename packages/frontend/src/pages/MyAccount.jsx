@@ -17,8 +17,12 @@ const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake }) => {
   const [amount, setAmount] = useState('');
   const [action, setAction] = useState('stake');
 
-  const canUnstake = stakeInfo?.unstakeAvailableAt > 0n &&
-    Number(stakeInfo.unstakeAvailableAt) <= Date.now() / 1000;
+  const stakedAmount = stakeInfo?.[0] || 0n;
+  const unstakeAmount = stakeInfo?.[1] || 0n;
+  const unstakeAvailableAt = stakeInfo?.[2] || 0n;
+
+  const canUnstake = unstakeAvailableAt > 0n &&
+    Number(unstakeAvailableAt) <= Date.now() / 1000;
 
   return (
     <div className="card-bordered">
@@ -31,7 +35,7 @@ const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake }) => {
         <div className="stat-card">
           <span className="stat-label">Staked</span>
           <div className="stat-value text-xl">
-            {stakeInfo ? formatUnits(stakeInfo.stakedAmount, 18) : '0'}
+            {formatUnits(stakedAmount, 18)}
           </div>
           <span className="text-xs text-gray-600 font-mono">SMEDAO</span>
         </div>
@@ -39,13 +43,13 @@ const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake }) => {
         <div className="stat-card">
           <span className="stat-label">Unstaking</span>
           <div className="stat-value text-xl text-amber-400">
-            {stakeInfo ? formatUnits(stakeInfo.unstakeAmount, 18) : '0'}
+            {formatUnits(unstakeAmount, 18)}
           </div>
           <span className="text-xs text-gray-600 font-mono">SMEDAO</span>
         </div>
       </div>
 
-      {stakeInfo?.unstakeAmount > 0n && (
+      {unstakeAmount > 0n && (
         <div className="mb-6 card-bordered border-amber-900/20 bg-amber-950/10">
           <div className="flex items-start space-x-3">
             <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
@@ -56,7 +60,7 @@ const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake }) => {
               <p className="text-xs text-gray-400">
                 {canUnstake
                   ? 'Available for withdrawal now'
-                  : `Available in ${Math.ceil((Number(stakeInfo.unstakeAvailableAt) - Date.now() / 1000) / 86400)} days`
+                  : `Available in ${Math.ceil((Number(unstakeAvailableAt) - Date.now() / 1000) / 86400)} days`
                 }
               </p>
             </div>

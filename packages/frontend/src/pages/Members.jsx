@@ -111,15 +111,6 @@ export default function Members() {
   const { writeContract, data: hash, isPending, isSuccess, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
-  console.log('💫 Transaction State:', {
-    isPending,
-    isSuccess,
-    isConfirming,
-    isConfirmed,
-    hash,
-    error: error?.message
-  });
-
   const { data } = useReadContracts({
     contracts: [
       {
@@ -158,31 +149,20 @@ export default function Members() {
   });
 
   const handlePropose = async () => {
-    console.log('🔍 Propose Member Debug:');
-    console.log('  Candidate:', candidateAddress);
-    console.log('  Reason:', reason);
-    console.log('  Connected:', isConnected);
-    console.log('  Contract:', CONTRACTS.sepolia.daoMembership);
-
-    if (!candidateAddress || !reason) {
-      console.log('❌ Missing candidate address or reason');
-      return;
-    }
+    if (!candidateAddress || !reason) return;
 
     try {
-      console.log('📝 Calling proposeMembership...');
       writeContract({
         address: CONTRACTS.sepolia.daoMembership,
         abi: ABIS.daoMembership,
         functionName: 'proposeMembership',
         args: [candidateAddress, reason],
-        gas: 500000n, // Set reasonable gas limit
+        gas: 500000n,
       });
-      console.log('✅ Transaction submitted');
       setCandidateAddress('');
       setReason('');
     } catch (error) {
-      console.error('❌ Error proposing member:', error);
+      console.error('Error proposing member:', error);
     }
   };
 
