@@ -1,13 +1,22 @@
-import { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import Loans from './pages/Loans';
+import Members from './pages/Members';
+import YieldPool from './pages/YieldPool';
+import MyAccount from './pages/MyAccount';
 
 function App() {
-  const [account, setAccount] = useState(null);
-
   return (
-    <div>
-      <h1>SME Lending Protocol</h1>
-      <p>Connected Account: {account || 'Not connected'}</p>
-    </div>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/loans" element={<Loans />} />
+        <Route path="/members" element={<Members />} />
+        <Route path="/yield" element={<YieldPool />} />
+        <Route path="/account" element={<MyAccount />} />
+      </Routes>
+    </Layout>
   );
 }
 

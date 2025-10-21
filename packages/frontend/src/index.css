@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-gray-800;
+  }
+
+  body {
+    @apply bg-black text-gray-100;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-1.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-800 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-700;
+  }
+}
+
+@layer components {
+  /* Professional Buttons - Morpho Style */
+  .btn-primary {
+    @apply px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg
+           transition-all duration-200 ease-out
+           hover:bg-blue-500 active:scale-[0.98]
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-blue-600;
+  }
+
+  .btn-secondary {
+    @apply px-5 py-2.5 bg-gray-900 text-gray-100 text-sm font-medium rounded-lg border border-gray-800
+           transition-all duration-200 ease-out
+           hover:bg-gray-800 hover:border-gray-700 active:scale-[0.98]
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply px-5 py-2.5 bg-transparent text-gray-400 text-sm font-medium rounded-lg border border-gray-800
+           transition-all duration-200 ease-out
+           hover:text-gray-100 hover:border-gray-700 active:scale-[0.98]
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-danger {
+    @apply px-5 py-2.5 bg-red-600/10 text-red-400 text-sm font-medium rounded-lg border border-red-600/20
+           transition-all duration-200 ease-out
+           hover:bg-red-600/20 hover:border-red-600/30 active:scale-[0.98]
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  /* Professional Cards */
+  .card {
+    @apply bg-zinc-950/50 backdrop-blur-sm border border-gray-900 rounded-xl p-6
+           transition-all duration-200 ease-out;
+  }
+
+  .card-hover {
+    @apply card hover:border-gray-800 hover:bg-zinc-950/70;
+  }
+
+  .card-bordered {
+    @apply card border-gray-800;
+  }
+
+  /* Professional Inputs */
+  .input {
+    @apply w-full px-4 py-2.5 bg-black border border-gray-800 rounded-lg
+           text-gray-100 text-sm placeholder-gray-600
+           focus:outline-none focus:border-gray-700 focus:bg-zinc-950
+           transition-all duration-200 ease-out;
+  }
+
+  .input:disabled {
+    @apply opacity-40 cursor-not-allowed;
+  }
+
+  /* Status Badges - Clean & Minimal */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply badge bg-emerald-500/10 text-emerald-400 border border-emerald-500/20;
+  }
+
+  .badge-warning {
+    @apply badge bg-amber-500/10 text-amber-400 border border-amber-500/20;
+  }
+
+  .badge-danger {
+    @apply badge bg-red-500/10 text-red-400 border border-red-500/20;
+  }
+
+  .badge-neutral {
+    @apply badge bg-gray-800/50 text-gray-400 border border-gray-800;
+  }
+
+  /* Stats Display */
+  .stat-card {
+    @apply flex flex-col space-y-1.5 p-4 rounded-lg bg-zinc-950/30 border border-gray-900
+           transition-all duration-200 ease-out;
+  }
+
+  .stat-label {
+    @apply text-xs font-medium text-gray-500 uppercase tracking-wide;
+  }
+
+  .stat-value {
+    @apply text-2xl font-semibold text-gray-100 tabular-nums;
+  }
+
+  .stat-change {
+    @apply text-xs font-medium tabular-nums;
+  }
+
+  /* Status Indicator */
+  .status-dot {
+    @apply inline-block w-1.5 h-1.5 rounded-full bg-emerald-400;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Loading Spinner */
+  .spinner {
+    @apply inline-block w-5 h-5 border-2 border-gray-800 border-t-blue-500 rounded-full;
+    animation: spin 0.8s linear infinite;
+  }
+
+  /* Data Table Styles */
+  .table-row {
+    @apply px-4 py-3 border-b border-gray-900 hover:bg-zinc-950/30 transition-colors duration-150;
+  }
+
+  .table-cell {
+    @apply text-sm text-gray-400 font-mono tabular-nums;
+  }
+
+  .table-header {
+    @apply text-xs font-medium text-gray-500 uppercase tracking-wide;
+  }
+}
+
+@layer utilities {
+  .font-mono {
+    font-family: 'JetBrains Mono', 'Monaco', 'Courier New', monospace;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent;
+  }
+
+  /* Smooth fade animations */
+  .fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .slide-up {
+    animation: slideUp 0.4s ease-out;
+  }
+}
+
+/* Professional Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Focus States */
+*:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2 ring-offset-black rounded-lg;
+}
+
+/* Selection */
+::selection {
+  @apply bg-blue-600 text-white;
+}
