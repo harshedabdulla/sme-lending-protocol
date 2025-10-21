@@ -97,14 +97,6 @@ export default function Dashboard() {
   const insuranceHealthy = data?.[5]?.result ?? true;
   const isMember = data?.[6]?.result ?? false;
 
-  // Debug logging
-  console.log('🔍 Membership Debug:');
-  console.log('  Connected:', isConnected);
-  console.log('  Address:', address);
-  console.log('  ReputationNFT contract:', CONTRACTS.sepolia.reputationNFT);
-  console.log('  Membership data:', data?.[6]);
-  console.log('  isMember result:', isMember);
-
   return (
     <div className="space-y-8">
       {/* Header */}

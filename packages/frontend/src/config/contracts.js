@@ -26,18 +26,65 @@ export const CONTRACTS = {
   },
 };
 
-// Simplified ABIs (only the functions we need for the frontend)
+// ABIs (only the functions we need for the frontend)
 export const ABIS = {
   governanceToken: [
-    "function balanceOf(address) view returns (uint256)",
-    "function stake(uint256 amount)",
-    "function requestUnstake(uint256 amount)",
-    "function unstake()",
-    "function getStakeInfo(address user) view returns (uint256 stakedAmount, uint256 unstakeAmount, uint256 unstakeAvailableAt)",
-    "function getVotingPower(address user) view returns (uint256)",
-    "function approve(address spender, uint256 amount) returns (bool)",
-    "event Staked(address indexed user, uint256 amount, uint256 totalStaked)",
-    "event Unstaked(address indexed user, uint256 amount)",
+    {
+      "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
+      "name": "balanceOf",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
+      "name": "stake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
+      "name": "requestUnstake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "unstake",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+      "name": "getStakeInfo",
+      "outputs": [
+        {"internalType": "uint256", "name": "stakedAmount", "type": "uint256"},
+        {"internalType": "uint256", "name": "unstakeAmount", "type": "uint256"},
+        {"internalType": "uint256", "name": "unstakeAvailableAt", "type": "uint256"}
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+      "name": "getVotingPower",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {"internalType": "address", "name": "spender", "type": "address"},
+        {"internalType": "uint256", "name": "amount", "type": "uint256"}
+      ],
+      "name": "approve",
+      "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
   ],
 
   reputationNFT: [
@@ -164,16 +211,65 @@ export const ABIS = {
   ],
 
   yieldingPool: [
-    "function deposit(uint256 amount)",
-    "function requestWithdrawal(uint256 shareAmount)",
-    "function withdraw()",
-    "function balanceOf(address user) view returns (uint256)",
-    "function shares(address user) view returns (uint256)",
-    "function getTotalValueLocked() view returns (uint256)",
-    "function withdrawalRequests(address user) view returns (uint256 shares, uint256 requestTime)",
-    "function canWithdraw(address user) view returns (bool)",
-    "event Deposited(address indexed user, uint256 amount, uint256 shares)",
-    "event Withdrawn(address indexed user, uint256 amount, uint256 shares)",
+    {
+      "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
+      "name": "deposit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "uint256", "name": "shareAmount", "type": "uint256"}],
+      "name": "requestWithdrawal",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+      "name": "balanceOf",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+      "name": "shares",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getTotalValueLocked",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "address", "name": "", "type": "address"}],
+      "name": "withdrawalRequests",
+      "outputs": [
+        {"internalType": "uint256", "name": "shares", "type": "uint256"},
+        {"internalType": "uint256", "name": "requestTime", "type": "uint256"}
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+      "name": "canWithdraw",
+      "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+      "stateMutability": "view",
+      "type": "function"
+    }
   ],
 
   insurancePool: [
@@ -193,11 +289,40 @@ export const ABIS = {
   ],
 
   mockUSDT: [
-    "function balanceOf(address) view returns (uint256)",
-    "function approve(address spender, uint256 amount) returns (bool)",
-    "function allowance(address owner, address spender) view returns (uint256)",
-    "function decimals() view returns (uint8)",
-    "event Approval(address indexed owner, address indexed spender, uint256 value)",
+    {
+      "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
+      "name": "balanceOf",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {"internalType": "address", "name": "spender", "type": "address"},
+        {"internalType": "uint256", "name": "amount", "type": "uint256"}
+      ],
+      "name": "approve",
+      "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {"internalType": "address", "name": "owner", "type": "address"},
+        {"internalType": "address", "name": "spender", "type": "address"}
+      ],
+      "name": "allowance",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [{"internalType": "uint8", "name": "", "type": "uint8"}],
+      "stateMutability": "view",
+      "type": "function"
+    }
   ],
 };
 

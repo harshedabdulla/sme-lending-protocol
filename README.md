@@ -1,4 +1,4 @@
-# SME Lending Protocol
+# Prism Finance
 
 A decentralized lending protocol for SMEs built on Ethereum.
 
