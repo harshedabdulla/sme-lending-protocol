@@ -95,11 +95,6 @@ export default function YieldPool() {
   const handleDeposit = async () => {
     if (!depositAmount) return;
 
-    console.log('💰 Deposit Debug:');
-    console.log('  Amount:', depositAmount);
-    console.log('  Parsed:', parseUnits(depositAmount, 6));
-    console.log('  Contract:', CONTRACTS.sepolia.yieldingPool);
-
     try {
       writeContract({
         address: CONTRACTS.sepolia.yieldingPool,
@@ -284,12 +279,12 @@ export default function YieldPool() {
                       <div className="text-center space-y-2">
                         {isConfirming && (
                           <p className="text-sm text-amber-400">
-                            ⏳ Transaction submitted, waiting for confirmation...
+                            Transaction submitted, waiting for confirmation...
                           </p>
                         )}
                         {isConfirmed && (
                           <p className="text-sm text-emerald-400">
-                            ✅ Deposit successful!
+                            Deposit successful!
                           </p>
                         )}
                         <p className="text-xs text-gray-600 font-mono">
@@ -307,7 +302,7 @@ export default function YieldPool() {
 
                     {error && (
                       <p className="text-sm text-center text-red-400">
-                        ❌ Error: {error.message}
+                        Error: {error.message}
                       </p>
                     )}
                   </div>

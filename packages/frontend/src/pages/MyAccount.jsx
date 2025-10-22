@@ -132,13 +132,13 @@ const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake, isProcessi
 
         {isProcessing && (
           <div className="text-xs text-blue-400 text-center">
-            ⏳ Transaction pending... Check MetaMask
+            Transaction pending... Check MetaMask
           </div>
         )}
 
         {isSuccess && (
           <div className="text-xs text-emerald-400 text-center">
-            ✓ Transaction confirmed!
+            Transaction confirmed!
           </div>
         )}
       </div>
