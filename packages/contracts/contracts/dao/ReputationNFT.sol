@@ -45,7 +45,7 @@ contract ReputationNFT is ERC721, Ownable {
     event UpdaterAuthorized(address indexed updater);
     event UpdaterRevoked(address indexed updater);
 
-    constructor() ERC721("DAO Reputation", "DAOREP") Ownable(msg.sender) {
+    constructor() ERC721("Prism Reputation", "PRISMREP") Ownable(msg.sender) {
         _nextTokenId = 1; // Start token IDs at 1
     }
 

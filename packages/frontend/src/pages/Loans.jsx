@@ -4,16 +4,40 @@ import { parseUnits, formatUnits } from 'viem';
 import { CONTRACTS, ABIS } from '../config/contracts';
 import { Coins, Users, Clock } from 'lucide-react';
 
-const LoanRequestCard = ({ request, requestId, onBack }) => {
-  const { address } = useAccount();
-
+const LoanRequestCard = ({ request, requestId, onBack, userVotingPower, userAddress, isMember }) => {
   const requiredCollateral = request.backerCount
     ? 100 - Math.min(80, Number(request.backerCount) * 8)
     : 100;
 
   const isExecutable = request.backerCount >= 3 && !request.executed;
-  const canBack = address && address !== request.borrower && !request.executed;
-  const daysLeft = Math.ceil((Number(request.endTime) - Date.now() / 1000) / 86400);
+  const isOwnLoan = userAddress && userAddress.toLowerCase() === request.borrower.toLowerCase();
+  const votingPeriodEnded = Number(request.endTime) <= Date.now() / 1000;
+  const hasEnoughStake = userVotingPower >= 500; // MIN_STAKE_TO_BACK = 500 tokens
+  const canBack = userAddress && !isOwnLoan && !request.executed && !votingPeriodEnded;
+  const secondsLeft = Math.max(0, Number(request.endTime) - Date.now() / 1000);
+  const minutesLeft = Math.ceil(secondsLeft / 60);
+  const timeLeftDisplay = minutesLeft > 0 ? `${minutesLeft} min` : 'Ended';
+
+  // Debug log
+  console.log(`Loan ${requestId} - Backing checks:`, {
+    userAddress,
+    borrower: request.borrower,
+    isMember,
+    isOwnLoan,
+    hasEnoughStake,
+    votingPower: userVotingPower,
+    votingPeriodEnded,
+    executed: request.executed
+  });
+
+  // Detailed reason why user can't back
+  let backingBlockedReason = '';
+  if (!userAddress) backingBlockedReason = 'Connect wallet';
+  else if (!isMember) backingBlockedReason = 'Not a DAO member';
+  else if (isOwnLoan) backingBlockedReason = 'Cannot back own loan';
+  else if (votingPeriodEnded) backingBlockedReason = 'Voting period ended';
+  else if (request.executed) backingBlockedReason = 'Already executed';
+  else if (!hasEnoughStake) backingBlockedReason = `Need 500 staked (have ${userVotingPower.toFixed(0)})`;
 
   return (
     <div className="card-hover">
@@ -69,22 +93,33 @@ const LoanRequestCard = ({ request, requestId, onBack }) => {
       {!request.executed && (
         <div className="flex items-center space-x-2 text-xs text-gray-500 mb-4">
           <Clock className="w-3.5 h-3.5" />
-          <span>Ends in {daysLeft} days</span>
+          <span>Ends in {timeLeftDisplay}</span>
         </div>
       )}
 
       {!request.executed && (
-        <div className="flex space-x-2">
-          {canBack && (
-            <button onClick={() => onBack(requestId)} className="flex-1 btn-secondary">
-              Back Loan
-            </button>
+        <div className="space-y-2">
+          {backingBlockedReason && (
+            <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded p-2">
+              ⚠️ {backingBlockedReason}
+            </div>
           )}
-          {isExecutable && (
-            <button className="flex-1 btn-primary">
-              Execute
-            </button>
-          )}
+          <div className="flex space-x-2">
+            {userAddress && !isOwnLoan && (
+              <button
+                onClick={() => onBack(requestId)}
+                disabled={!canBack || !hasEnoughStake || !isMember}
+                className="flex-1 btn-secondary"
+              >
+                Back Loan
+              </button>
+            )}
+            {isExecutable && (
+              <button className="flex-1 btn-primary">
+                Execute
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
@@ -96,9 +131,10 @@ export default function Loans() {
   const [amount, setAmount] = useState('');
   const [collateral, setCollateral] = useState('100');
   const [activeTab, setActiveTab] = useState('browse');
+  const [error, setError] = useState('');
 
-  const { writeContract, data: hash } = useWriteContract();
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
+  const { writeContract, data: hash, error: writeError } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
   const { data: requestCountData } = useReadContracts({
     contracts: [
@@ -127,28 +163,119 @@ export default function Loans() {
     watch: true,
   });
 
+  // Check if user is an active member, eligible for loan, and get credit score
+  const { data: eligibilityData } = useReadContracts({
+    contracts: [
+      {
+        address: CONTRACTS.sepolia.daoMembership,
+        abi: ABIS.daoMembership,
+        functionName: 'isActiveMember',
+        args: address ? [address] : undefined,
+      },
+      {
+        address: CONTRACTS.sepolia.loanManager,
+        abi: ABIS.loanManager,
+        functionName: 'checkEligibility',
+        args: address ? [address] : undefined,
+      },
+      {
+        address: CONTRACTS.sepolia.creditScore,
+        abi: [
+          {
+            "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+            "name": "getScore",
+            "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+            "stateMutability": "view",
+            "type": "function"
+          }
+        ],
+        functionName: 'getScore',
+        args: address ? [address] : undefined,
+      },
+    ],
+    watch: true,
+  });
+
+  const isActiveMember = eligibilityData?.[0]?.result ?? false;
+  const eligibilityResult = eligibilityData?.[1]?.result;
+  const isEligible = eligibilityResult?.[0] ?? false;
+  const eligibilityReason = eligibilityResult?.[1] ?? '';
+  const creditScore = eligibilityData?.[2]?.result ? Number(eligibilityData[2].result) : 0;
+
+  // Debug membership status
+  console.log('Membership status for', address, ':', {
+    isActiveMember,
+    rawResult: eligibilityData?.[0]?.result,
+    isEligible,
+    eligibilityReason,
+    creditScore
+  });
+
+  // Get user's voting power for backing loans
+  const { data: votingPowerData } = useReadContracts({
+    contracts: [
+      {
+        address: CONTRACTS.sepolia.governanceToken,
+        abi: ABIS.governanceToken,
+        functionName: 'getVotingPower',
+        args: address ? [address] : undefined,
+      },
+    ],
+    watch: true,
+  });
+
+  const votingPower = votingPowerData?.[0]?.result
+    ? Number(formatUnits(votingPowerData[0].result, 18))
+    : 0;
+
   const handleRequestLoan = async () => {
-    if (!amount) return;
+    if (!amount || !collateral) return;
+
+    setError('');
 
     try {
+      const amountInWei = parseUnits(amount, 6);
+      const collateralPct = BigInt(collateral);
+
+      console.log('Requesting loan with params:', {
+        amount,
+        amountInWei: amountInWei.toString(),
+        collateral,
+        collateralPct: collateralPct.toString(),
+        address,
+        isActiveMember,
+        isEligible,
+        eligibilityReason
+      });
+
       writeContract({
         address: CONTRACTS.sepolia.loanVoting,
         abi: ABIS.loanVoting,
         functionName: 'requestLoan',
-        args: [parseUnits(amount, 6), BigInt(collateral)],
+        args: [amountInWei, collateralPct],
+        gas: 500000n, // Set explicit gas limit
       });
-    } catch (error) {
-      console.error('Error requesting loan:', error);
+    } catch (err) {
+      console.error('Error requesting loan:', err);
+      setError(err.message || 'Failed to request loan');
     }
   };
 
   const handleBackLoan = async (requestId) => {
     try {
+      console.log('Backing loan with params:', {
+        requestId,
+        address,
+        votingPower,
+        isActiveMember,
+      });
+
       writeContract({
         address: CONTRACTS.sepolia.loanVoting,
         abi: ABIS.loanVoting,
         functionName: 'backLoan',
         args: [BigInt(requestId)],
+        gas: 500000n,
       });
     } catch (error) {
       console.error('Error backing loan:', error);
@@ -228,6 +355,9 @@ export default function Loans() {
                       approved,
                     }}
                     onBack={handleBackLoan}
+                    userVotingPower={votingPower}
+                    userAddress={address}
+                    isMember={isActiveMember}
                   />
                 );
               })}
@@ -241,6 +371,52 @@ export default function Loans() {
         <div className="max-w-2xl">
           <div className="card-bordered">
             <h2 className="text-lg font-semibold text-gray-100 mb-6">Request a Loan</h2>
+
+            {!isConnected && (
+              <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 mb-6">
+                <p className="text-sm text-blue-400">
+                  Please connect your wallet to request a loan
+                </p>
+              </div>
+            )}
+
+            {isConnected && !isActiveMember && (
+              <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-6">
+                <p className="text-sm text-amber-400 mb-2">⚠️ You are not an active DAO member</p>
+                <p className="text-xs text-gray-400">
+                  Only active DAO members can request loans. Ask an existing member to propose you in the Members tab.
+                </p>
+              </div>
+            )}
+
+            {isConnected && isActiveMember && !isEligible && (
+              <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 mb-6">
+                <p className="text-sm text-red-400 mb-2">❌ Not eligible for loan</p>
+                <p className="text-xs text-gray-400 mb-3">
+                  Reason: {eligibilityReason}
+                </p>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-500">Your Credit Score:</span>
+                  <span className={`font-mono font-medium ${creditScore >= 600 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {creditScore} / 1000
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs mt-1">
+                  <span className="text-gray-500">Minimum Required:</span>
+                  <span className="font-mono font-medium text-gray-400">600 / 1000</span>
+                </div>
+                {creditScore < 600 && (
+                  <div className="mt-3 p-2 rounded bg-gray-900/50">
+                    <p className="text-xs text-gray-400">
+                      💡 <strong>Fix:</strong> Run this script to set your credit score:
+                    </p>
+                    <code className="text-xs text-blue-400 block mt-1 font-mono">
+                      cd packages/contracts && npx hardhat run scripts/set_credit_score.js --network sepolia
+                    </code>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="space-y-5">
               <div>
@@ -300,16 +476,38 @@ export default function Loans() {
 
               <button
                 onClick={handleRequestLoan}
-                disabled={!amount || isConfirming || !isConnected}
+                disabled={!amount || !collateral || isConfirming || !isConnected || !isActiveMember || !isEligible}
                 className="w-full btn-primary"
               >
-                {isConfirming ? 'Confirming...' : 'Submit Request'}
+                {isConfirming ? 'Confirming...' : 'Submit Loan Request'}
               </button>
 
               {!isConnected && (
                 <p className="text-sm text-center text-gray-600">
                   Connect wallet to request a loan
                 </p>
+              )}
+
+              {error && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <p className="text-sm text-red-400">{error}</p>
+                </div>
+              )}
+
+              {writeError && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <p className="text-sm text-red-400">
+                    Transaction failed: {writeError.message}
+                  </p>
+                </div>
+              )}
+
+              {isSuccess && (
+                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                  <p className="text-sm text-emerald-400">
+                    ✓ Loan request submitted successfully!
+                  </p>
+                </div>
               )}
             </div>
           </div>

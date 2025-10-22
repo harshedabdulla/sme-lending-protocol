@@ -13,7 +13,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
-const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake }) => {
+const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake, isProcessing, isSuccess }) => {
   const [amount, setAmount] = useState('');
   const [action, setAction] = useState('stake');
 
@@ -60,7 +60,7 @@ const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake }) => {
               <p className="text-xs text-gray-400">
                 {canUnstake
                   ? 'Available for withdrawal now'
-                  : `Available in ${Math.ceil((Number(unstakeAvailableAt) - Date.now() / 1000) / 86400)} days`
+                  : `Available in ${Math.ceil((Number(unstakeAvailableAt) - Date.now() / 1000) / 60)} min`
                 }
               </p>
             </div>
@@ -103,29 +103,42 @@ const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake }) => {
         {action === 'stake' ? (
           <button
             onClick={() => onStake(amount)}
-            disabled={!amount}
+            disabled={!amount || isProcessing}
             className="w-full btn-primary"
           >
-            Stake Tokens
+            {isProcessing ? 'Processing...' : 'Stake Tokens'}
           </button>
         ) : (
           <div className="space-y-2">
             <button
               onClick={() => onRequestUnstake(amount)}
-              disabled={!amount}
+              disabled={!amount || isProcessing}
               className="w-full btn-secondary"
             >
-              Request Unstake
+              {isProcessing ? 'Processing...' : 'Request Unstake'}
             </button>
             {canUnstake && (
               <button
                 onClick={onUnstake}
+                disabled={isProcessing}
                 className="w-full btn-primary"
               >
                 <Unlock className="w-4 h-4 inline mr-2" />
-                Withdraw Unstaked Tokens
+                {isProcessing ? 'Processing...' : 'Withdraw Unstaked Tokens'}
               </button>
             )}
+          </div>
+        )}
+
+        {isProcessing && (
+          <div className="text-xs text-blue-400 text-center">
+            ⏳ Transaction pending... Check MetaMask
+          </div>
+        )}
+
+        {isSuccess && (
+          <div className="text-xs text-emerald-400 text-center">
+            ✓ Transaction confirmed!
           </div>
         )}
       </div>
@@ -156,8 +169,8 @@ const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake }) => {
 export default function MyAccount() {
   const { address, isConnected } = useAccount();
 
-  const { writeContract, data: hash } = useWriteContract();
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
+  const { writeContract, data: hash, isPending: isWritePending } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
   const { data, isLoading } = useReadContracts({
     contracts: [
@@ -346,6 +359,8 @@ export default function MyAccount() {
           onStake={handleStake}
           onUnstake={handleUnstake}
           onRequestUnstake={handleRequestUnstake}
+          isProcessing={isWritePending || isConfirming}
+          isSuccess={isSuccess}
         />
       </div>
 

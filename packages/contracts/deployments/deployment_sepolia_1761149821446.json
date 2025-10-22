@@ -1,0 +1,18 @@
+{
+  "network": "sepolia",
+  "chainId": "11155111",
+  "deployer": "0xdD432f6Cabe3fc3C3558DAc269FEd9c3512FB87C",
+  "timestamp": "2025-10-22T16:13:56.955Z",
+  "contracts": {
+    "mockUSDT": "0x693Cf8b7fec5271E96bBE2a61bE71A119d3E4353",
+    "creditScore": "0xe203736b0BfFBda4F916C05dce57d2d5B247a36d",
+    "lendingPool": "0xedf2d378aF3eb8aAfbf5dDE5CdC6aE1A9D692863",
+    "loanManager": "0x4604c3a325500A16A9E8796bc319B935c35D87a7",
+    "governanceToken": "0x42462fE2BC7eDfEa5afA7fDE220758D1c008697f",
+    "reputationNFT": "0xC71e16e2dd66c5Cb9F17A9247a8b9498cB1f1828",
+    "daoMembership": "0x14698085E61bbbD8366C4E51508E2A5B5dFFBAf4",
+    "yieldingPool": "0x1cf6E4B77a404699A5B6B1800C3e5330905bbc75",
+    "insurancePool": "0x0a73b3d52F5f9e340c104D7B927f33b414D02736",
+    "loanVoting": "0x26245cbcF12b57F6Eec44F30d92b4Ef2a2237D5B"
+  }
+}

@@ -44,7 +44,7 @@ contract YieldingPool is Ownable, ReentrancyGuard {
         uint256 requestTime;
     }
     mapping(address => WithdrawalRequest) public withdrawalRequests;
-    uint256 public constant WITHDRAWAL_DELAY = 2 days;
+    uint256 public constant WITHDRAWAL_DELAY = 5 minutes;
 
     // Events
     event Deposited(address indexed user, uint256 amount, uint256 shares);
