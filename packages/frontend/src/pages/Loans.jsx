@@ -391,7 +391,7 @@ export default function Loans() {
 
             {isConnected && isActiveMember && !isEligible && (
               <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 mb-6">
-                <p className="text-sm text-red-400 mb-2">❌ Not eligible for loan</p>
+                <p className="text-sm text-red-400 mb-2">Not eligible for loan</p>
                 <p className="text-xs text-gray-400 mb-3">
                   Reason: {eligibilityReason}
                 </p>
@@ -408,11 +408,8 @@ export default function Loans() {
                 {creditScore < 600 && (
                   <div className="mt-3 p-2 rounded bg-gray-900/50">
                     <p className="text-xs text-gray-400">
-                      💡 <strong>Fix:</strong> Run this script to set your credit score:
+                      Needs to fetch credit score:
                     </p>
-                    <code className="text-xs text-blue-400 block mt-1 font-mono">
-                      cd packages/contracts && npx hardhat run scripts/set_credit_score.js --network sepolia
-                    </code>
                   </div>
                 )}
               </div>
@@ -505,7 +502,7 @@ export default function Loans() {
               {isSuccess && (
                 <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                   <p className="text-sm text-emerald-400">
-                    ✓ Loan request submitted successfully!
+                    Loan request submitted successfully!
                   </p>
                 </div>
               )}

@@ -19,25 +19,6 @@ const ProposalCard = ({ proposal, proposalId, onVote, onExecute }) => {
   const minutesLeft = Math.ceil(secondsLeft / 60);
   const timeLeftDisplay = minutesLeft > 0 ? `${minutesLeft} min` : 'Ended';
 
-  // Debug logging
-  console.log(`Proposal #${proposalId}:`, {
-    candidate: proposal.candidate,
-    proposer: proposal.proposer,
-    executed: proposal.executed,
-    approved: proposal.approved,
-    endTime: endTimeSeconds,
-    currentTime: currentTime,
-    secondsLeft: secondsLeft,
-    minutesLeft: minutesLeft,
-    votingEnded: votingEnded,
-    isActive: isActive,
-    canExecute: canExecute,
-    timeLeftDisplay: timeLeftDisplay,
-    votesFor: proposal.votesFor.toString(),
-    votesAgainst: proposal.votesAgainst.toString(),
-    reason: proposal.reason
-  });
-
   return (
     <div className="card-hover">
       <div className="flex items-start justify-between mb-4">
@@ -125,12 +106,12 @@ const ProposalCard = ({ proposal, proposalId, onVote, onExecute }) => {
         <div className="space-y-3">
           <div className="card bg-blue-950/20 border border-blue-900/30">
             <p className="text-sm text-blue-300 mb-2 font-medium">
-              ⏰ Voting period ended
+              Voting period ended
             </p>
             <p className="text-xs text-gray-400">
               {forPercentage >= 66.67
-                ? '✓ Proposal has enough votes to pass (≥66.67%)'
-                : '✗ Proposal does not have enough votes to pass (<66.67%)'}
+                ? 'Proposal has enough votes to pass (≥66.67%)'
+                : 'Proposal does not have enough votes to pass (<66.67%)'}
             </p>
           </div>
           <button
@@ -145,7 +126,7 @@ const ProposalCard = ({ proposal, proposalId, onVote, onExecute }) => {
       {proposal.executed && (
         <div className="text-center p-3 rounded-lg bg-zinc-950/30 border border-gray-900">
           <p className="text-sm text-gray-400">
-            {proposal.approved ? '✓ Member admitted to DAO' : '✗ Proposal rejected'}
+            {proposal.approved ? 'Member admitted to DAO' : 'Proposal rejected'}
           </p>
         </div>
       )}
@@ -161,15 +142,6 @@ export default function Members() {
 
   const { writeContract, data: hash, isPending, isSuccess, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
-
-  // Log transaction states
-  console.log('=== TRANSACTION STATE ===');
-  console.log('isPending:', isPending);
-  console.log('isConfirming:', isConfirming);
-  console.log('isSuccess:', isSuccess);
-  console.log('isConfirmed:', isConfirmed);
-  console.log('hash:', hash);
-  console.log('error:', error);
 
   const { data } = useReadContracts({
     contracts: [
@@ -241,28 +213,16 @@ export default function Members() {
   };
 
   const handleExecute = async (proposalId) => {
-    console.log('=== EXECUTING PROPOSAL ===');
-    console.log('Proposal ID:', proposalId);
-    console.log('Contract Address:', CONTRACTS.sepolia.daoMembership);
-    console.log('Args:', [BigInt(proposalId)]);
-
     try {
-      const result = writeContract({
+      writeContract({
         address: CONTRACTS.sepolia.daoMembership,
         abi: ABIS.daoMembership,
         functionName: 'executeProposal',
         args: [BigInt(proposalId)],
         gas: 500000n,
       });
-      console.log('Transaction initiated:', result);
     } catch (error) {
-      console.error('=== EXECUTION ERROR ===');
-      console.error('Full error:', error);
-      console.error('Error message:', error?.message);
-      console.error('Error details:', error?.details);
-      console.error('Error data:', error?.data);
-      console.error('Error cause:', error?.cause);
-      alert(`Error executing proposal: ${error?.message || error}`);
+      console.error('Error executing proposal:', error);
     }
   };
 
@@ -339,13 +299,13 @@ export default function Members() {
           {/* Transaction Status */}
           {isPending && (
             <div className="mb-4 p-4 bg-blue-950/20 border border-blue-900/30 rounded-lg">
-              <p className="text-sm text-blue-300">⏳ Waiting for wallet confirmation...</p>
+              <p className="text-sm text-blue-300">Waiting for wallet confirmation...</p>
             </div>
           )}
 
           {isConfirming && (
             <div className="mb-4 p-4 bg-amber-950/20 border border-amber-900/30 rounded-lg">
-              <p className="text-sm text-amber-300">⏳ Transaction confirming...</p>
+              <p className="text-sm text-amber-300">Transaction confirming...</p>
               {hash && (
                 <p className="text-xs text-gray-400 mt-1 font-mono">
                   <a
@@ -363,7 +323,7 @@ export default function Members() {
 
           {isConfirmed && (
             <div className="mb-4 p-4 bg-emerald-950/20 border border-emerald-900/30 rounded-lg">
-              <p className="text-sm text-emerald-300">✓ Transaction confirmed!</p>
+              <p className="text-sm text-emerald-300">Transaction confirmed!</p>
             </div>
           )}
 
@@ -499,12 +459,12 @@ export default function Members() {
                 <div className="text-center space-y-2">
                   {isConfirming && (
                     <p className="text-sm text-amber-400">
-                      ⏳ Transaction submitted, waiting for confirmation...
+                      Transaction submitted, waiting for confirmation...
                     </p>
                   )}
                   {isConfirmed && (
                     <p className="text-sm text-emerald-400">
-                      ✅ Proposal created successfully! Check the Proposals tab.
+                      Proposal created successfully! Check the Proposals tab.
                     </p>
                   )}
                   <p className="text-xs text-gray-600 font-mono">
@@ -522,7 +482,7 @@ export default function Members() {
 
               {error && (
                 <p className="text-sm text-center text-red-400">
-                  ❌ Error: {error.message}
+                  Error: {error.message}
                 </p>
               )}
 
