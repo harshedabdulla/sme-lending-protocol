@@ -19,7 +19,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 contract GovernanceToken is ERC20, Ownable, ReentrancyGuard {
 
     // Staking Configuration
-    uint256 public constant UNSTAKE_COOLDOWN = 7 days;
+    uint256 public constant UNSTAKE_COOLDOWN = 5 minutes;
     uint256 public constant SLASH_PERCENTAGE = 10; // 10% slash on bad backing
     uint256 public constant MIN_STAKE_AMOUNT = 100 * 10**18; // 100 tokens minimum
 

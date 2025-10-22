@@ -33,7 +33,7 @@ contract LoanVoting is Ownable, ReentrancyGuard {
     uint256 public constant COLLATERAL_REDUCTION_PER_BACKER = 8; // 8% reduction per backer
 
     // Voting Configuration
-    uint256 public constant VOTING_PERIOD = 3 days;
+    uint256 public constant VOTING_PERIOD = 5 minutes;
     uint256 public minBackers = 3; // Minimum backers required
     uint256 public minStakeToBack = 500 * 10**18; // Min stake to back a loan
 

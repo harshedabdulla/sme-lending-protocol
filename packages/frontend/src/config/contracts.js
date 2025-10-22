@@ -198,16 +198,67 @@ export const ABIS = {
   ],
 
   loanVoting: [
-    "function requestLoan(uint256 amount, uint256 collateralPercentage) returns (uint256)",
-    "function backLoan(uint256 requestId)",
-    "function executeRequest(uint256 requestId)",
-    "function getRequest(uint256 requestId) view returns (address borrower, uint256 amount, uint256 requestedCollateral, uint256 startTime, uint256 endTime, uint256 backerCount, bool executed, bool approved)",
-    "function getBackers(uint256 requestId) view returns (address[])",
-    "function calculateRequiredCollateral(uint256 backerCount) pure returns (uint256)",
-    "function requestCount() view returns (uint256)",
-    "event LoanRequested(uint256 indexed requestId, address indexed borrower, uint256 amount, uint256 requestedCollateral)",
-    "event LoanBacked(uint256 indexed requestId, address indexed backer, uint256 votingPower)",
-    "event LoanApproved(uint256 indexed requestId, address indexed borrower, uint256 amount, uint256 requiredCollateral, uint256 backerCount)",
+    {
+      "inputs": [
+        {"internalType": "uint256", "name": "amount", "type": "uint256"},
+        {"internalType": "uint256", "name": "collateralPercentage", "type": "uint256"}
+      ],
+      "name": "requestLoan",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "uint256", "name": "requestId", "type": "uint256"}],
+      "name": "backLoan",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "uint256", "name": "requestId", "type": "uint256"}],
+      "name": "executeRequest",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "uint256", "name": "requestId", "type": "uint256"}],
+      "name": "getRequest",
+      "outputs": [
+        {"internalType": "address", "name": "borrower", "type": "address"},
+        {"internalType": "uint256", "name": "amount", "type": "uint256"},
+        {"internalType": "uint256", "name": "requestedCollateral", "type": "uint256"},
+        {"internalType": "uint256", "name": "startTime", "type": "uint256"},
+        {"internalType": "uint256", "name": "endTime", "type": "uint256"},
+        {"internalType": "uint256", "name": "backerCount", "type": "uint256"},
+        {"internalType": "bool", "name": "executed", "type": "bool"},
+        {"internalType": "bool", "name": "approved", "type": "bool"}
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "uint256", "name": "requestId", "type": "uint256"}],
+      "name": "getBackers",
+      "outputs": [{"internalType": "address[]", "name": "", "type": "address[]"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "uint256", "name": "backerCount", "type": "uint256"}],
+      "name": "calculateRequiredCollateral",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "requestCount",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    }
   ],
 
   yieldingPool: [
@@ -273,19 +324,90 @@ export const ABIS = {
   ],
 
   insurancePool: [
-    "function getTotalBalance() view returns (uint256)",
-    "function getAvailableBalance() view returns (uint256)",
-    "function isHealthy() view returns (bool)",
-    "function totalCollected() view returns (uint256)",
-    "function totalPaidOut() view returns (uint256)",
+    {
+      "inputs": [],
+      "name": "getTotalBalance",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAvailableBalance",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isHealthy",
+      "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalCollected",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalPaidOut",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    }
   ],
 
   loanManager: [
-    "function loans(address borrower) view returns (uint256 principal, uint256 interestRate, uint256 totalOwed, uint256 amountRepaid, uint256 startTime, uint256 deadline, uint8 status)",
-    "function getRemainingDebt(address borrower) view returns (uint256)",
-    "function checkEligibility(address borrower) view returns (bool eligible, string reason)",
-    "function totalActiveLoans() view returns (uint256)",
-    "function totalLoansDisbursed() view returns (uint256)",
+    {
+      "inputs": [{"internalType": "address", "name": "borrower", "type": "address"}],
+      "name": "loans",
+      "outputs": [
+        {"internalType": "uint256", "name": "principal", "type": "uint256"},
+        {"internalType": "uint256", "name": "interestRate", "type": "uint256"},
+        {"internalType": "uint256", "name": "totalOwed", "type": "uint256"},
+        {"internalType": "uint256", "name": "amountRepaid", "type": "uint256"},
+        {"internalType": "uint256", "name": "startTime", "type": "uint256"},
+        {"internalType": "uint256", "name": "deadline", "type": "uint256"},
+        {"internalType": "uint8", "name": "status", "type": "uint8"}
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "address", "name": "borrower", "type": "address"}],
+      "name": "getRemainingDebt",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{"internalType": "address", "name": "borrower", "type": "address"}],
+      "name": "checkEligibility",
+      "outputs": [
+        {"internalType": "bool", "name": "eligible", "type": "bool"},
+        {"internalType": "string", "name": "reason", "type": "string"}
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalActiveLoans",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalLoansDisbursed",
+      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+      "stateMutability": "view",
+      "type": "function"
+    }
   ],
 
   mockUSDT: [
@@ -340,14 +462,14 @@ export const CONTRACT_INFO = {
   },
 };
 
-// Protocol parameters
+// Protocol parameters (UPDATED FOR DEMO - 5 minutes instead of days)
 export const PROTOCOL_PARAMS = {
   minStakeToVote: "100", // 100 tokens
   minStakeToBack: "500", // 500 tokens
-  unstakeCooldown: 7 * 24 * 60 * 60, // 7 days in seconds
+  unstakeCooldown: 5 * 60, // 5 minutes in seconds (was 7 days)
   slashPercentage: 10, // 10%
-  membershipVotePeriod: 7 * 24 * 60 * 60, // 7 days
-  loanVotePeriod: 3 * 24 * 60 * 60, // 3 days
+  membershipVotePeriod: 5 * 60, // 5 minutes in seconds (was 7 days)
+  loanVotePeriod: 5 * 60, // 5 minutes in seconds (was 3 days)
   minBackers: 3,
   protocolFee: 1, // 1%
   insuranceCoverage: 30, // 30%

@@ -23,7 +23,7 @@ contract DAOMembership is Ownable {
     ReputationNFT public reputationNFT;
 
     // Voting Configuration
-    uint256 public constant VOTING_PERIOD = 7 days;
+    uint256 public constant VOTING_PERIOD = 5 minutes;
     uint256 public constant APPROVAL_THRESHOLD = 6667; // 66.67% (2/3 in basis points)
     uint256 public newMemberTokenGrant = 1000 * 10**18; // Tokens granted to new members
 

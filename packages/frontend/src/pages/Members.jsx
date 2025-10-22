@@ -3,15 +3,40 @@ import { useAccount, useReadContracts, useWriteContract, useWaitForTransactionRe
 import { CONTRACTS, ABIS } from '../config/contracts';
 import { Users, UserPlus, Vote, CheckCircle, XCircle, Clock } from 'lucide-react';
 
-const ProposalCard = ({ proposal, proposalId, onVote }) => {
+const ProposalCard = ({ proposal, proposalId, onVote, onExecute }) => {
   const { address } = useAccount();
 
   const totalVotes = proposal.votesFor + proposal.votesAgainst;
   const forPercentage = totalVotes > 0n ? Number((proposal.votesFor * 10000n) / totalVotes) / 100 : 0;
   const againstPercentage = 100 - forPercentage;
 
-  const isActive = !proposal.executed && Number(proposal.endTime) > Date.now() / 1000;
-  const daysLeft = Math.ceil((Number(proposal.endTime) - Date.now() / 1000) / 86400);
+  const currentTime = Date.now() / 1000;
+  const endTimeSeconds = Number(proposal.endTime);
+  const votingEnded = currentTime > endTimeSeconds;
+  const isActive = !proposal.executed && !votingEnded;
+  const canExecute = !proposal.executed && votingEnded;
+  const secondsLeft = Math.max(0, endTimeSeconds - currentTime);
+  const minutesLeft = Math.ceil(secondsLeft / 60);
+  const timeLeftDisplay = minutesLeft > 0 ? `${minutesLeft} min` : 'Ended';
+
+  // Debug logging
+  console.log(`Proposal #${proposalId}:`, {
+    candidate: proposal.candidate,
+    proposer: proposal.proposer,
+    executed: proposal.executed,
+    approved: proposal.approved,
+    endTime: endTimeSeconds,
+    currentTime: currentTime,
+    secondsLeft: secondsLeft,
+    minutesLeft: minutesLeft,
+    votingEnded: votingEnded,
+    isActive: isActive,
+    canExecute: canExecute,
+    timeLeftDisplay: timeLeftDisplay,
+    votesFor: proposal.votesFor.toString(),
+    votesAgainst: proposal.votesAgainst.toString(),
+    reason: proposal.reason
+  });
 
   return (
     <div className="card-hover">
@@ -71,13 +96,17 @@ const ProposalCard = ({ proposal, proposalId, onVote }) => {
         </div>
       </div>
 
-      {isActive && (
+      {/* Time display */}
+      {!proposal.executed && (
         <div className="flex items-center space-x-2 text-xs text-gray-500 mb-4">
           <Clock className="w-3.5 h-3.5" />
-          <span>Ends in {daysLeft} days</span>
+          <span>
+            {isActive ? `Ends in ${timeLeftDisplay}` : 'Voting ended'}
+          </span>
         </div>
       )}
 
+      {/* Vote buttons - only show during active voting */}
       {isActive && (
         <div className="flex space-x-2">
           <button onClick={() => onVote(proposalId, true)} className="flex-1 btn-secondary text-sm">
@@ -87,6 +116,28 @@ const ProposalCard = ({ proposal, proposalId, onVote }) => {
           <button onClick={() => onVote(proposalId, false)} className="flex-1 btn-danger text-sm">
             <XCircle className="w-3.5 h-3.5 inline mr-1.5" />
             Against
+          </button>
+        </div>
+      )}
+
+      {/* Execute button - show when voting ended but not executed */}
+      {canExecute && (
+        <div className="space-y-3">
+          <div className="card bg-blue-950/20 border border-blue-900/30">
+            <p className="text-sm text-blue-300 mb-2 font-medium">
+              ⏰ Voting period ended
+            </p>
+            <p className="text-xs text-gray-400">
+              {forPercentage >= 66.67
+                ? '✓ Proposal has enough votes to pass (≥66.67%)'
+                : '✗ Proposal does not have enough votes to pass (<66.67%)'}
+            </p>
+          </div>
+          <button
+            onClick={() => onExecute(proposalId)}
+            className="w-full btn-primary text-sm"
+          >
+            Execute Proposal
           </button>
         </div>
       )}
@@ -110,6 +161,15 @@ export default function Members() {
 
   const { writeContract, data: hash, isPending, isSuccess, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
+
+  // Log transaction states
+  console.log('=== TRANSACTION STATE ===');
+  console.log('isPending:', isPending);
+  console.log('isConfirming:', isConfirming);
+  console.log('isSuccess:', isSuccess);
+  console.log('isConfirmed:', isConfirmed);
+  console.log('hash:', hash);
+  console.log('error:', error);
 
   const { data } = useReadContracts({
     contracts: [
@@ -173,10 +233,36 @@ export default function Members() {
         abi: ABIS.daoMembership,
         functionName: 'vote',
         args: [BigInt(proposalId), support],
-        gas: 300000n, // Set reasonable gas limit
+        gas: 300000n,
       });
     } catch (error) {
       console.error('Error voting:', error);
+    }
+  };
+
+  const handleExecute = async (proposalId) => {
+    console.log('=== EXECUTING PROPOSAL ===');
+    console.log('Proposal ID:', proposalId);
+    console.log('Contract Address:', CONTRACTS.sepolia.daoMembership);
+    console.log('Args:', [BigInt(proposalId)]);
+
+    try {
+      const result = writeContract({
+        address: CONTRACTS.sepolia.daoMembership,
+        abi: ABIS.daoMembership,
+        functionName: 'executeProposal',
+        args: [BigInt(proposalId)],
+        gas: 500000n,
+      });
+      console.log('Transaction initiated:', result);
+    } catch (error) {
+      console.error('=== EXECUTION ERROR ===');
+      console.error('Full error:', error);
+      console.error('Error message:', error?.message);
+      console.error('Error details:', error?.details);
+      console.error('Error data:', error?.data);
+      console.error('Error cause:', error?.cause);
+      alert(`Error executing proposal: ${error?.message || error}`);
     }
   };
 
@@ -239,6 +325,48 @@ export default function Members() {
       {/* Proposals Tab */}
       {activeTab === 'proposals' && (
         <div>
+          {/* Error Display */}
+          {error && (
+            <div className="mb-4 p-4 bg-red-950/20 border border-red-900/30 rounded-lg">
+              <p className="text-sm text-red-300 font-medium mb-2">Transaction Error</p>
+              <p className="text-xs text-gray-400">{error.message}</p>
+              {error.cause && (
+                <p className="text-xs text-gray-500 mt-1">Cause: {error.cause.toString()}</p>
+              )}
+            </div>
+          )}
+
+          {/* Transaction Status */}
+          {isPending && (
+            <div className="mb-4 p-4 bg-blue-950/20 border border-blue-900/30 rounded-lg">
+              <p className="text-sm text-blue-300">⏳ Waiting for wallet confirmation...</p>
+            </div>
+          )}
+
+          {isConfirming && (
+            <div className="mb-4 p-4 bg-amber-950/20 border border-amber-900/30 rounded-lg">
+              <p className="text-sm text-amber-300">⏳ Transaction confirming...</p>
+              {hash && (
+                <p className="text-xs text-gray-400 mt-1 font-mono">
+                  <a
+                    href={`https://sepolia.etherscan.io/tx/${hash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-blue-400"
+                  >
+                    View on Etherscan ↗
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
+
+          {isConfirmed && (
+            <div className="mb-4 p-4 bg-emerald-950/20 border border-emerald-900/30 rounded-lg">
+              <p className="text-sm text-emerald-300">✓ Transaction confirmed!</p>
+            </div>
+          )}
+
           {!isConnected ? (
             <div className="card text-center py-12">
               <Vote className="w-12 h-12 text-gray-700 mx-auto mb-4" />
@@ -275,6 +403,7 @@ export default function Members() {
                       reason,
                     }}
                     onVote={handleVote}
+                    onExecute={handleExecute}
                   />
                 );
               })}
