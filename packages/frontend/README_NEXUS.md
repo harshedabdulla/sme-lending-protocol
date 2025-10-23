@@ -2,7 +2,7 @@
 
 This document outlines how Prism Finance integrates with Avail Nexus SDK to provide cross-chain lending and DeFi functionality.
 
-## 🚀 Overview
+## Overview
 
 Prism Finance is a social collateral protocol that reduces loan collateral requirements through community backing. With Avail Nexus SDK integration, the protocol now supports:
 
@@ -12,7 +12,7 @@ Prism Finance is a social collateral protocol that reduces loan collateral requi
 - **DAO-based governance** with multi-chain voting
 - **Gas management** and refueling across chains
 
-## 🏗️ Architecture
+## Architecture
 
 ### Core Components
 
@@ -28,7 +28,7 @@ Prism Finance is a social collateral protocol that reduces loan collateral requi
 - **Polygon** - Low-cost transactions and yield farming
 - **Arbitrum** - High-performance lending operations
 
-## 🔧 Implementation Details
+## Implementation Details
 
 ### 1. Nexus SDK Integration
 
@@ -141,7 +141,7 @@ const refuelIntent = await createCrossChainIntent({
 });
 ```
 
-## 🎯 Key Features
+## Key Features
 
 ### Track 1: Unchained Apps
 - **Cross-chain Intent Interactions** - Seamless lending/borrowing across chains
@@ -153,7 +153,7 @@ const refuelIntent = await createCrossChainIntent({
 - **Bridge & Execute** - Loan disbursement and repayment in single transaction
 - **Unified Balance Management** - Single view of assets across chains
 
-## 🚀 Hackathon Deliverables
+## Hackathon Deliverables
 
 ### Functional App Features
 

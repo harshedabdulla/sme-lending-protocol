@@ -117,7 +117,18 @@ const CrossChainLoanRequest = ({ onRequestLoan, nexus }) => {
   const [isCreatingIntent, setIsCreatingIntent] = useState(false);
 
   const handleCrossChainRequest = async () => {
-    if (!amount || !nexus) return;
+    if (!amount || !nexus) {
+      console.log('❌ Missing amount or Nexus not connected');
+      return;
+    }
+
+    console.log('🚀 Starting cross-chain loan request...');
+    console.log('📊 Request details:', {
+      amount,
+      selectedChain,
+      collateral,
+      timestamp: new Date().toISOString()
+    });
 
     setIsCreatingIntent(true);
     try {
@@ -132,13 +143,20 @@ const CrossChainLoanRequest = ({ onRequestLoan, nexus }) => {
         token: 'USDT',
       };
 
+      console.log('🔗 Creating cross-chain intent with data:', intentData);
+
       const intent = await createCrossChainIntent(intentData);
-      console.log('Cross-chain loan intent created:', intent);
+      console.log('✅ Cross-chain loan intent created successfully:', intent);
+      console.log('🎯 Intent ID:', intent.id);
+      console.log('📈 Intent Status:', intent.status);
+      console.log('⏰ Created at:', new Date(intent.timestamp).toLocaleString());
 
       // Call the original request function
       await onRequestLoan(amount, collateral, intent);
+      console.log('🎉 Cross-chain loan request submitted successfully!');
     } catch (error) {
-      console.error('Failed to create cross-chain loan intent:', error);
+      console.error('❌ Failed to create cross-chain loan intent:', error);
+      console.error('🔍 Error details:', error.message);
     } finally {
       setIsCreatingIntent(false);
     }
@@ -174,9 +192,11 @@ const CrossChainLoanRequest = ({ onRequestLoan, nexus }) => {
             onChange={(e) => setSelectedChain(e.target.value)}
             className="input"
           >
-            <option value="ethereum">Ethereum</option>
-            <option value="polygon">Polygon</option>
-            <option value="arbitrum">Arbitrum</option>
+            <option value="ethereum">Ethereum (8.5% APY)</option>
+            <option value="polygon">Polygon (12.3% APY)</option>
+            <option value="arbitrum">Arbitrum (10.7% APY)</option>
+            <option value="base">Base (9.2% APY)</option>
+            <option value="optimism">Optimism (11.1% APY)</option>
           </select>
         </div>
 

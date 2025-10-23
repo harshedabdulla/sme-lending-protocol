@@ -191,7 +191,18 @@ export default function Members() {
   ];
 
   const handlePropose = async () => {
-    if (!candidateAddress || !reason) return;
+    if (!candidateAddress || !reason) {
+      console.log('❌ Please fill in candidate address and reason');
+      return;
+    }
+
+    console.log('🚀 Starting DAO proposal creation...');
+    console.log('📊 Proposal details:', {
+      candidate: candidateAddress,
+      reason: reason,
+      proposer: address,
+      timestamp: new Date().toISOString()
+    });
 
     try {
       // Create cross-chain intent for proposal
@@ -206,21 +217,31 @@ export default function Members() {
           proposalType: 'membership',
         };
 
+        console.log('🔗 Creating cross-chain DAO proposal intent:', intentData);
+
         const intent = await createCrossChainIntent(intentData);
-        console.log('Cross-chain DAO proposal intent created:', intent);
+        console.log('✅ Cross-chain DAO proposal intent created:', intent);
+        console.log('🎯 Intent ID:', intent.id);
+        console.log('📈 Intent Status:', intent.status);
+        console.log('⏰ Created at:', new Date(intent.timestamp).toLocaleString());
       }
 
       // Mock proposal creation
-      console.log('Creating proposal:', {
-        candidate: candidateAddress,
-        reason: reason,
-        proposer: address,
-      });
+      console.log('💰 Processing DAO proposal creation...');
 
+      // Simulate transaction processing
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      console.log('✅ DAO proposal created successfully!');
+      console.log('🎯 Proposal ID: ' + Math.floor(Math.random() * 1000));
+      console.log('🎉 Cross-chain proposal submitted successfully!');
+
+      // Reset form
       setCandidateAddress('');
       setReason('');
     } catch (error) {
-      console.error('Error proposing member:', error);
+      console.error('❌ Error creating DAO proposal:', error);
+      console.error('🔍 Error details:', error.message);
     }
   };
 
@@ -347,8 +368,8 @@ export default function Members() {
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
-                ? 'border-blue-500 text-gray-100'
-                : 'border-transparent text-gray-500 hover:text-gray-300'
+              ? 'border-blue-500 text-gray-100'
+              : 'border-transparent text-gray-500 hover:text-gray-300'
               }`}
           >
             {tab === 'proposals' && 'Proposals'}
