@@ -99,3 +99,5 @@ export async function getUnifiedBalances() {
         throw error;
     }
 }
+
+// todo: 1. needs to update getUnifiedBalances to fetch real user balances

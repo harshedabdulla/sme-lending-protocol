@@ -51,7 +51,6 @@ const InfoCard = ({ title, items }) => (
 export default function Dashboard() {
   const { address, isConnected } = useAccount();
 
-  // ✅ NEW: Nexus integration (ADDED, not replaced)
   const { nexus } = useNexus();
   const [unifiedBalances, setUnifiedBalances] = useState(null);
   const [crossChainStats, setCrossChainStats] = useState({
@@ -60,7 +59,6 @@ export default function Dashboard() {
     crossChainVolume: 0,
   });
 
-  // ✅ KEPT: Original contract data fetching (FIXED addresses)
   const { data, isLoading } = useReadContracts({
     contracts: [
       {
@@ -103,7 +101,6 @@ export default function Dashboard() {
     watch: true,
   });
 
-  // ✅ NEW: Load unified balances when Nexus is available
   useEffect(() => {
     if (nexus && address) {
       loadUnifiedBalances();
@@ -132,7 +129,6 @@ export default function Dashboard() {
     }
   };
 
-  // ✅ KEPT: Original data parsing from contracts
   const tvl = data?.[0]?.result ? formatUnits(data[0].result, 6) : '0';
   const memberCount = data?.[1]?.result ? data[1].result.toString() : '0';
   const activeLoans = data?.[2]?.result ? data[2].result.toString() : '0';
@@ -153,7 +149,6 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* Onboarding Banners */}
       {!isConnected && (
         <div className="card-bordered border-blue-900/20 bg-blue-950/10">
           <div className="flex items-start space-x-3">
@@ -207,7 +202,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ✅ KEPT: Original Stats Grid with real data */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Value Locked"
@@ -235,7 +229,7 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* ✅ NEW: Cross-Chain Stats Section (ONLY if Nexus is available) */}
+      {/* Cross-Chain Stats Section (ONLY if Nexus is available) */}
       {nexus && (
         <div className="card">
           <div className="flex items-center justify-between mb-6">
@@ -257,8 +251,9 @@ export default function Dashboard() {
               <div className="text-2xl font-semibold text-gray-100 tabular-nums">
                 {crossChainStats.totalChains}
               </div>
+              {/* todo:makechains dynamic */}
               <div className="text-xs text-gray-500 mt-1">
-                Ethereum, Polygon, Arbitrum
+                Ethereum, Polygon, Arbitrum, Base, Optimism, Avalanche, Sepolia
               </div>
             </div>
 
@@ -305,7 +300,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ✅ KEPT: Original Pool Status */}
+      {/* KEPT: Original Pool Status */}
       <div className="card">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-gray-100">Protocol Status</h2>
