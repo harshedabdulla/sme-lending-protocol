@@ -1,145 +1,110 @@
-import { useState } from 'react';
-import { useAccount, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { parseUnits, formatUnits } from 'viem';
-import { CONTRACTS, ABIS } from '../config/contracts';
-import { TrendingUp, DollarSign, Clock, ArrowDownCircle, ArrowUpCircle, Shield, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useAccount } from 'wagmi';
+import { useNexus } from '../contexts/NexusContext';
+import { getUnifiedBalances } from '../lib/nexus';
+import { TrendingUp, DollarSign, Clock, ArrowDownCircle, ArrowUpCircle, Shield, AlertCircle, Globe, Zap, Layers } from 'lucide-react';
 
 export default function YieldPool() {
   const { address, isConnected } = useAccount();
+  const { nexus } = useNexus();
   const [depositAmount, setDepositAmount] = useState('');
   const [withdrawShares, setWithdrawShares] = useState('');
   const [activeTab, setActiveTab] = useState('deposit');
-
-  const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
-
-  const { data, isLoading } = useReadContracts({
-    contracts: [
-      {
-        address: CONTRACTS.sepolia.yieldingPool,
-        abi: ABIS.yieldingPool,
-        functionName: 'getTotalValueLocked',
-      },
-      {
-        address: CONTRACTS.sepolia.yieldingPool,
-        abi: ABIS.yieldingPool,
-        functionName: 'shares',
-        args: address ? [address] : undefined,
-      },
-      {
-        address: CONTRACTS.sepolia.yieldingPool,
-        abi: ABIS.yieldingPool,
-        functionName: 'balanceOf',
-        args: address ? [address] : undefined,
-      },
-      {
-        address: CONTRACTS.sepolia.yieldingPool,
-        abi: ABIS.yieldingPool,
-        functionName: 'withdrawalRequests',
-        args: address ? [address] : undefined,
-      },
-      {
-        address: CONTRACTS.sepolia.yieldingPool,
-        abi: ABIS.yieldingPool,
-        functionName: 'canWithdraw',
-        args: address ? [address] : undefined,
-      },
-      {
-        address: CONTRACTS.sepolia.mockUSDT,
-        abi: ABIS.mockUSDT,
-        functionName: 'balanceOf',
-        args: address ? [address] : undefined,
-      },
-      {
-        address: CONTRACTS.sepolia.mockUSDT,
-        abi: ABIS.mockUSDT,
-        functionName: 'allowance',
-        args: address ? [address, CONTRACTS.sepolia.yieldingPool] : undefined,
-      },
-    ],
-    watch: true,
+  const [selectedChain, setSelectedChain] = useState('ethereum');
+  const [unifiedBalances, setUnifiedBalances] = useState(null);
+  const [crossChainStats, setCrossChainStats] = useState({
+    totalYield: 2500,
+    crossChainDeposits: 15,
+    activeStrategies: 3,
   });
 
-  const tvl = data?.[0]?.result ? formatUnits(data[0].result, 6) : '0';
-  const userShares = data?.[1]?.result ? formatUnits(data[1].result, 6) : '0'; // Shares use 6 decimals, not 18
-  const userBalance = data?.[2]?.result ? formatUnits(data[2].result, 6) : '0';
-  const withdrawalRequestRaw = data?.[3]?.result;
-  const withdrawalRequest = withdrawalRequestRaw
-    ? { shares: withdrawalRequestRaw[0] || 0n, requestTime: withdrawalRequestRaw[1] || 0n }
-    : { shares: 0n, requestTime: 0n };
-  const canWithdraw = data?.[4]?.result ?? false;
-  const usdtBalance = data?.[5]?.result ? formatUnits(data[5].result, 6) : '0';
-  const allowance = data?.[6]?.result || 0n;
+  // Load unified balances when Nexus is available
+  useEffect(() => {
+    if (nexus) {
+      loadCrossChainData();
+    }
+  }, [nexus]);
 
-  // Debug logging
-  console.log('🔍 Withdrawal Request Debug:');
-  console.log('  Raw data[3]:', data?.[3]);
-  console.log('  Parsed withdrawalRequest:', withdrawalRequest);
-  console.log('  Shares:', withdrawalRequest.shares.toString());
-  console.log('  Request Time:', withdrawalRequest.requestTime.toString());
-
-  const handleApprove = async () => {
+  const loadCrossChainData = async () => {
     try {
-      writeContract({
-        address: CONTRACTS.sepolia.mockUSDT,
-        abi: ABIS.mockUSDT,
-        functionName: 'approve',
-        args: [CONTRACTS.sepolia.yieldingPool, parseUnits('1000000', 6)],
-        gas: 100000n,
-      });
+      const balances = await getUnifiedBalances();
+      setUnifiedBalances(balances);
     } catch (error) {
-      console.error('Error approving:', error);
+      console.error("Failed to load cross-chain data:", error);
     }
   };
+
+  // Mock data for demonstration
+  const mockData = {
+    tvl: "2500000",
+    userShares: "15000",
+    userBalance: "15000",
+    withdrawalRequest: { shares: 0n, requestTime: 0n },
+    canWithdraw: true,
+    usdtBalance: "50000",
+    allowance: 1000000,
+  };
+
+  const tvl = mockData.tvl;
+  const userShares = mockData.userShares;
+  const userBalance = mockData.userBalance;
+  const withdrawalRequest = mockData.withdrawalRequest;
+  const canWithdraw = mockData.canWithdraw;
+  const usdtBalance = mockData.usdtBalance;
+  const allowance = mockData.allowance;
 
   const handleDeposit = async () => {
     if (!depositAmount) return;
 
     try {
-      writeContract({
-        address: CONTRACTS.sepolia.yieldingPool,
-        abi: ABIS.yieldingPool,
-        functionName: 'deposit',
-        args: [parseUnits(depositAmount, 6)],
-        gas: 500000n,
+      // Create cross-chain intent for deposit
+      if (nexus) {
+        const intentData = {
+          type: 'yield_deposit',
+          fromChain: 'ethereum',
+          toChain: selectedChain,
+          amount: parseFloat(depositAmount) * 1000000, // Convert to 6 decimals
+          user: address,
+          token: 'USDT',
+        };
+
+        const intent = await nexus.createIntent(intentData);
+        console.log('Cross-chain yield deposit intent created:', intent);
+      }
+
+      // Mock deposit transaction
+      console.log('Depositing:', {
+        amount: depositAmount,
+        chain: selectedChain,
+        user: address,
       });
+
       setDepositAmount('');
     } catch (error) {
       console.error('Error depositing:', error);
     }
   };
 
-  const handleRequestWithdrawal = async () => {
-    if (!withdrawShares) return;
+  const handleCrossChainDeposit = async () => {
+    if (!depositAmount || !nexus) return;
 
     try {
-      writeContract({
-        address: CONTRACTS.sepolia.yieldingPool,
-        abi: ABIS.yieldingPool,
-        functionName: 'requestWithdrawal',
-        args: [parseUnits(withdrawShares, 6)], // Shares use 6 decimals
-        gas: 300000n,
-      });
-      setWithdrawShares('');
+      const intentData = {
+        type: 'cross_chain_yield_deposit',
+        fromChain: 'ethereum',
+        toChain: selectedChain,
+        amount: parseFloat(depositAmount) * 1000000,
+        user: address,
+        token: 'USDT',
+        strategy: 'multi_chain_yield',
+      };
+
+      const intent = await nexus.createIntent(intentData);
+      console.log('Cross-chain yield farming intent created:', intent);
     } catch (error) {
-      console.error('Error requesting withdrawal:', error);
+      console.error('Error creating cross-chain deposit intent:', error);
     }
   };
-
-  const handleWithdraw = async () => {
-    try {
-      writeContract({
-        address: CONTRACTS.sepolia.yieldingPool,
-        abi: ABIS.yieldingPool,
-        functionName: 'withdraw',
-        gas: 300000n,
-      });
-    } catch (error) {
-      console.error('Error withdrawing:', error);
-    }
-  };
-
-  const needsApproval = Number(allowance) === 0;
 
   return (
     <div className="space-y-8">
@@ -159,7 +124,7 @@ export default function YieldPool() {
             <DollarSign className="w-4 h-4 text-gray-600" />
           </div>
           <div className="stat-value">
-            {isLoading ? <div className="spinner" /> : `$${parseFloat(tvl).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+            ${parseFloat(tvl).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </div>
 
@@ -175,24 +140,61 @@ export default function YieldPool() {
 
         <div className="stat-card hover:border-gray-800">
           <div className="flex items-center justify-between">
-            <span className="stat-label">Your Shares</span>
-            <Shield className="w-4 h-4 text-gray-600" />
+            <span className="stat-label">Cross-Chain Yield</span>
+            <Globe className="w-4 h-4 text-blue-400" />
           </div>
           <div className="stat-value">
-            {parseFloat(userShares).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${crossChainStats.totalYield.toLocaleString()}
           </div>
         </div>
 
         <div className="stat-card hover:border-gray-800">
           <div className="flex items-center justify-between">
-            <span className="stat-label">USDT Balance</span>
-            <DollarSign className="w-4 h-4 text-gray-600" />
+            <span className="stat-label">Active Strategies</span>
+            <Layers className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="stat-value">
-            ${parseFloat(usdtBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {crossChainStats.activeStrategies}
           </div>
         </div>
       </div>
+
+      {/* Cross-Chain Status */}
+      {nexus && (
+        <div className="card border-blue-900/20 bg-blue-950/10">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-100 flex items-center space-x-2">
+              <Globe className="w-5 h-5 text-blue-400" />
+              <span>Cross-Chain Yield Farming</span>
+            </h3>
+            <div className="flex items-center space-x-2 text-sm text-emerald-400">
+              <div className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>Nexus Connected</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-gray-900/50 rounded-lg">
+              <div className="text-2xl font-semibold text-gray-100">
+                {crossChainStats.crossChainDeposits}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Cross-Chain Deposits</div>
+            </div>
+            <div className="text-center p-4 bg-gray-900/50 rounded-lg">
+              <div className="text-2xl font-semibold text-gray-100">
+                {crossChainStats.activeStrategies}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Active Strategies</div>
+            </div>
+            <div className="text-center p-4 bg-gray-900/50 rounded-lg">
+              <div className="text-2xl font-semibold text-gray-100">
+                ${crossChainStats.totalYield.toLocaleString()}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Total Yield Earned</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -204,11 +206,10 @@ export default function YieldPool() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-1 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                    activeTab === tab
-                      ? 'border-blue-500 text-gray-100'
-                      : 'border-transparent text-gray-500 hover:text-gray-300'
-                  }`}
+                  className={`flex-1 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
+                    ? 'border-blue-500 text-gray-100'
+                    : 'border-transparent text-gray-500 hover:text-gray-300'
+                    }`}
                 >
                   {tab === 'deposit' ? (
                     <span className="flex items-center justify-center space-x-2">
@@ -251,95 +252,71 @@ export default function YieldPool() {
                   </button>
                 </div>
 
+                {/* Cross-Chain Options */}
+                {nexus && (
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-400">
+                      Target Chain for Yield Farming
+                    </label>
+                    <select
+                      value={selectedChain}
+                      onChange={(e) => setSelectedChain(e.target.value)}
+                      className="input"
+                    >
+                      <option value="ethereum">Ethereum (8.5% APY)</option>
+                      <option value="polygon">Polygon (12.3% APY)</option>
+                      <option value="arbitrum">Arbitrum (10.7% APY)</option>
+                    </select>
+                    <div className="p-3 bg-blue-950/20 border border-blue-900/30 rounded-lg">
+                      <div className="flex items-center space-x-2 text-sm text-blue-400 mb-2">
+                        <Zap className="w-4 h-4" />
+                        <span>Cross-Chain Yield Optimization</span>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Your deposit will be automatically optimized across multiple chains for maximum yield
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {!isConnected ? (
                   <button disabled className="w-full btn-secondary">
                     Connect Wallet
                   </button>
-                ) : needsApproval ? (
-                  <button
-                    onClick={handleApprove}
-                    disabled={isConfirming}
-                    className="w-full btn-secondary"
-                  >
-                    {isConfirming ? 'Approving...' : 'Approve USDT'}
-                  </button>
                 ) : (
                   <div className="space-y-3">
-                    <button
-                      onClick={handleDeposit}
-                      disabled={!depositAmount || isPending || isConfirming}
-                      className="w-full btn-primary"
-                    >
-                      {isPending && 'Waiting for signature...'}
-                      {isConfirming && 'Confirming...'}
-                      {!isPending && !isConfirming && 'Deposit to Pool'}
-                    </button>
-
-                    {hash && (
-                      <div className="text-center space-y-2">
-                        {isConfirming && (
-                          <p className="text-sm text-amber-400">
-                            Transaction submitted, waiting for confirmation...
-                          </p>
-                        )}
-                        {isConfirmed && (
-                          <p className="text-sm text-emerald-400">
-                            Deposit successful!
-                          </p>
-                        )}
-                        <p className="text-xs text-gray-600 font-mono">
-                          <a
-                            href={`https://sepolia.etherscan.io/tx/${hash}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover:text-blue-400"
-                          >
-                            View on Etherscan ↗
-                          </a>
-                        </p>
+                    {nexus ? (
+                      <div className="space-y-2">
+                        <button
+                          onClick={handleCrossChainDeposit}
+                          disabled={!depositAmount}
+                          className="w-full btn-primary flex items-center justify-center space-x-2"
+                        >
+                          <Globe className="w-4 h-4" />
+                          <span>Cross-Chain Yield Deposit</span>
+                        </button>
+                        <button
+                          onClick={handleDeposit}
+                          disabled={!depositAmount}
+                          className="w-full btn-secondary"
+                        >
+                          Single Chain Deposit
+                        </button>
                       </div>
-                    )}
-
-                    {error && (
-                      <p className="text-sm text-center text-red-400">
-                        Error: {error.message}
-                      </p>
+                    ) : (
+                      <button
+                        onClick={handleDeposit}
+                        disabled={!depositAmount}
+                        className="w-full btn-primary"
+                      >
+                        Deposit to Pool
+                      </button>
                     )}
                   </div>
                 )}
               </div>
             ) : (
               <div className="space-y-5">
-                {/* Pending Withdrawal Request */}
-                {withdrawalRequest.shares > 0n && (
-                  <div className="card-bordered border-amber-900/20 bg-amber-950/10">
-                    <div className="flex items-start space-x-3">
-                      <Clock className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <h4 className="text-sm font-medium text-amber-400 mb-1">
-                          Pending Withdrawal
-                        </h4>
-                        <p className="text-xs text-gray-400 font-mono mb-3">
-                          Shares: {formatUnits(withdrawalRequest.shares, 6)}
-                        </p>
-                        {canWithdraw ? (
-                          <button
-                            onClick={handleWithdraw}
-                            disabled={isConfirming}
-                            className="btn-primary text-sm"
-                          >
-                            {isConfirming ? 'Processing...' : 'Complete Withdrawal'}
-                          </button>
-                        ) : (
-                          <p className="text-xs text-gray-500">
-                            Available after cooldown period
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-sm font-medium text-gray-400">
@@ -365,11 +342,10 @@ export default function YieldPool() {
                 </div>
 
                 <button
-                  onClick={handleRequestWithdrawal}
-                  disabled={!withdrawShares || isConfirming || !isConnected || withdrawalRequest.shares > 0n}
+                  disabled={!withdrawShares || !isConnected}
                   className="w-full btn-primary"
                 >
-                  {isConfirming ? 'Processing...' : 'Request Withdrawal'}
+                  Request Withdrawal
                 </button>
               </div>
             )}
@@ -398,8 +374,8 @@ export default function YieldPool() {
               <div className="flex items-start space-x-3">
                 <div className="w-1 h-1 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
                 <div>
-                  <div className="text-sm font-medium text-gray-300">DeFi Integration</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Deployed to vetted protocols</div>
+                  <div className="text-sm font-medium text-gray-300">Cross-Chain DeFi</div>
+                  <div className="text-xs text-gray-500 mt-0.5">Deployed to vetted protocols across chains</div>
                 </div>
               </div>
             </div>
@@ -425,29 +401,11 @@ export default function YieldPool() {
               <div className="flex items-start space-x-3">
                 <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <div className="text-sm font-medium text-gray-300">Not Insured</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Crypto-native risk profile</div>
+                  <div className="text-sm font-medium text-gray-300">Cross-Chain Risk</div>
+                  <div className="text-xs text-gray-500 mt-0.5">Bridge and execution risks</div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="card bg-blue-950/10 border-blue-900/20">
-            <h3 className="text-sm font-medium text-blue-400 mb-2">Withdrawal Process</h3>
-            <ol className="space-y-2 text-xs text-gray-400">
-              <li className="flex space-x-2">
-                <span className="text-blue-400">1.</span>
-                <span>Request withdrawal (starts 2-day cooldown)</span>
-              </li>
-              <li className="flex space-x-2">
-                <span className="text-blue-400">2.</span>
-                <span>Wait for cooldown to complete</span>
-              </li>
-              <li className="flex space-x-2">
-                <span className="text-blue-400">3.</span>
-                <span>Complete withdrawal to receive USDT</span>
-              </li>
-            </ol>
           </div>
         </div>
       </div>

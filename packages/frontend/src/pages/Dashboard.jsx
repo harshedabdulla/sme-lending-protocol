@@ -1,7 +1,7 @@
-import { useAccount, useReadContracts } from 'wagmi';
-import { formatUnits } from 'viem';
+import { useAccount } from 'wagmi';
 import { Link } from 'react-router-dom';
-import { CONTRACTS, ABIS } from '../config/contracts';
+import { useNexus } from '../contexts/NexusContext';
+import { getUnifiedBalances } from '../lib/nexus';
 import {
   TrendingUp,
   Users,
@@ -9,7 +9,10 @@ import {
   Shield,
   DollarSign,
   ArrowRight,
+  Globe,
+  Zap,
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const StatCard = ({ label, value, icon: Icon, loading }) => (
   <div className="stat-card hover:border-gray-800 group">
@@ -46,56 +49,48 @@ const InfoCard = ({ title, items }) => (
 
 export default function Dashboard() {
   const { address, isConnected } = useAccount();
-
-  const { data, isLoading } = useReadContracts({
-    contracts: [
-      {
-        address: CONTRACTS.sepolia.yieldingPool,
-        abi: ABIS.yieldingPool,
-        functionName: 'getTotalValueLocked',
-      },
-      {
-        address: CONTRACTS.sepolia.reputationNFT,
-        abi: ABIS.reputationNFT,
-        functionName: 'totalSupply',
-      },
-      {
-        address: CONTRACTS.sepolia.loanManager,
-        abi: ABIS.loanManager,
-        functionName: 'totalActiveLoans',
-      },
-      {
-        address: CONTRACTS.sepolia.loanManager,
-        abi: ABIS.loanManager,
-        functionName: 'totalLoansDisbursed',
-      },
-      {
-        address: CONTRACTS.sepolia.insurancePool,
-        abi: ABIS.insurancePool,
-        functionName: 'getTotalBalance',
-      },
-      {
-        address: CONTRACTS.sepolia.insurancePool,
-        abi: ABIS.insurancePool,
-        functionName: 'isHealthy',
-      },
-      {
-        address: CONTRACTS.sepolia.reputationNFT,
-        abi: ABIS.reputationNFT,
-        functionName: 'hasMembership',
-        args: address ? [address] : undefined,
-      },
-    ],
-    watch: true,
+  const { nexus } = useNexus();
+  const [unifiedBalances, setUnifiedBalances] = useState(null);
+  const [crossChainStats, setCrossChainStats] = useState({
+    totalChains: 3,
+    activeIntents: 5,
+    crossChainVolume: 50000,
   });
 
-  const tvl = data?.[0]?.result ? formatUnits(data[0].result, 6) : '0';
-  const memberCount = data?.[1]?.result ? data[1].result.toString() : '0';
-  const activeLoans = data?.[2]?.result ? data[2].result.toString() : '0';
-  const totalLoans = data?.[3]?.result ? data[3].result.toString() : '0';
-  const insuranceBalance = data?.[4]?.result ? formatUnits(data[4].result, 6) : '0';
-  const insuranceHealthy = data?.[5]?.result ?? true;
-  const isMember = data?.[6]?.result ?? false;
+  // Load unified balances when Nexus is available
+  useEffect(() => {
+    if (nexus) {
+      loadUnifiedBalances();
+    }
+  }, [nexus]);
+
+  const loadUnifiedBalances = async () => {
+    try {
+      const balances = await getUnifiedBalances();
+      setUnifiedBalances(balances);
+    } catch (error) {
+      console.error("Failed to load unified balances:", error);
+    }
+  };
+
+  // Mock data for demonstration
+  const mockData = {
+    tvl: "1250000",
+    memberCount: "156",
+    activeLoans: "23",
+    totalLoans: "89",
+    insuranceBalance: "375000",
+    insuranceHealthy: true,
+    isMember: true,
+  };
+
+  const tvl = mockData.tvl;
+  const memberCount = mockData.memberCount;
+  const activeLoans = mockData.activeLoans;
+  const totalLoans = mockData.totalLoans;
+  const insuranceBalance = mockData.insuranceBalance;
+  const insuranceHealthy = mockData.insuranceHealthy;
+  const isMember = mockData.isMember;
 
   return (
     <div className="space-y-8">
@@ -169,27 +164,97 @@ export default function Dashboard() {
           label="Total Value Locked"
           value={`$${parseFloat(tvl).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={DollarSign}
-          loading={isLoading}
+          loading={false}
         />
         <StatCard
           label="Active Members"
           value={memberCount}
           icon={Users}
-          loading={isLoading}
+          loading={false}
         />
         <StatCard
           label="Active Loans"
           value={`${activeLoans}/${totalLoans}`}
           icon={Coins}
-          loading={isLoading}
+          loading={false}
         />
         <StatCard
           label="Insurance Pool"
           value={`$${parseFloat(insuranceBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
           icon={Shield}
-          loading={isLoading}
+          loading={false}
         />
       </div>
+
+      {/* Cross-Chain Stats */}
+      {nexus && (
+        <div className="card">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-gray-100 flex items-center space-x-2">
+              <Globe className="w-5 h-5 text-blue-400" />
+              <span>Cross-Chain Activity</span>
+            </h2>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 rounded-full bg-blue-400" />
+              <span className="text-sm text-gray-500">Nexus Connected</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Supported Chains
+              </div>
+              <div className="text-2xl font-semibold text-gray-100 tabular-nums">
+                {crossChainStats.totalChains}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                Ethereum, Polygon, Arbitrum
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Active Intents
+              </div>
+              <div className="text-2xl font-semibold text-gray-100 tabular-nums">
+                {crossChainStats.activeIntents}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                Pending cross-chain transactions
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Cross-Chain Volume
+              </div>
+              <div className="text-2xl font-semibold text-gray-100 tabular-nums">
+                ${crossChainStats.crossChainVolume.toLocaleString()}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">
+                Total bridged value
+              </div>
+            </div>
+          </div>
+
+          {unifiedBalances && (
+            <div className="mt-6 p-4 bg-gray-900/50 rounded-lg">
+              <h3 className="text-sm font-medium text-gray-300 mb-3">Unified Balances</h3>
+              <div className="space-y-2">
+                {Object.entries(unifiedBalances.balances || {}).map(([chain, balance]) => (
+                  <div key={chain} className="flex justify-between items-center text-sm">
+                    <span className="text-gray-400 capitalize">{chain}</span>
+                    <span className="text-gray-100 font-mono">
+                      {balance.USDT ? `$${balance.USDT.toLocaleString()}` : 'N/A'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Pool Status */}
       <div className="card">
