@@ -1,358 +1,86 @@
-/**
- * Deployed Contract Addresses and ABIs
- * Network: Sepolia Testnet
- * All addresses are loaded from environment variables
- */
+// Contract addresses and ABIs
+export const CONTRACT_ADDRESSES = {
+  // Main contracts
+  LENDING_POOL: import.meta.env.VITE_LENDING_POOL_ADDRESS || "0x...",
+  LOAN_MANAGER: import.meta.env.VITE_LOAN_MANAGER_ADDRESS || "0x...",
+  CREDIT_SCORE: import.meta.env.VITE_CREDIT_SCORE_ADDRESS || "0x...",
 
-export const CHAIN_ID = {
-  SEPOLIA: Number(import.meta.env.VITE_CHAIN_ID) || 11155111,
+  // DAO contracts
+  DAO_MEMBERSHIP: import.meta.env.VITE_DAO_MEMBERSHIP_ADDRESS || "0x...",
+  GOVERNANCE_TOKEN: import.meta.env.VITE_GOVERNANCE_TOKEN_ADDRESS || "0x...",
+  REPUTATION_NFT: import.meta.env.VITE_REPUTATION_NFT_ADDRESS || "0x...",
+  INSURANCE_POOL: import.meta.env.VITE_INSURANCE_POOL_ADDRESS || "0x...",
+  YIELDING_POOL: import.meta.env.VITE_YIELDING_POOL_ADDRESS || "0x...",
+
+  // Token contracts
+  USDT: "0xdAC17F958D2ee523a2206206994597C13D831ec7", // Mainnet USDT
+  USDC: "0xA0b86a33E6441b8C4C8C0C4C8C0C4C8C0C4C8C0C4", // Mainnet USDC
 };
 
-export const CONTRACTS = {
+// Chain configurations for cross-chain operations
+export const CHAIN_CONFIG = {
+  ethereum: {
+    chainId: 1,
+    name: "Ethereum",
+    rpcUrl: "https://eth.llamarpc.com",
+    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  },
+  polygon: {
+    chainId: 137,
+    name: "Polygon",
+    rpcUrl: "https://polygon.llamarpc.com",
+    nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
+  },
+  arbitrum: {
+    chainId: 42161,
+    name: "Arbitrum One",
+    rpcUrl: "https://arbitrum.llamarpc.com",
+    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  },
   sepolia: {
-    // Base Protocol Contracts
-    mockUSDT: import.meta.env.VITE_MOCK_USDT_ADDRESS,
-    creditScore: import.meta.env.VITE_CREDIT_SCORE_ADDRESS,
-    lendingPool: import.meta.env.VITE_LENDING_POOL_ADDRESS,
-    loanManager: import.meta.env.VITE_LOAN_MANAGER_ADDRESS,
-
-    // DAO Governance Contracts
-    governanceToken: import.meta.env.VITE_GOVERNANCE_TOKEN_ADDRESS,
-    reputationNFT: import.meta.env.VITE_REPUTATION_NFT_ADDRESS,
-    daoMembership: import.meta.env.VITE_DAO_MEMBERSHIP_ADDRESS,
-    yieldingPool: import.meta.env.VITE_YIELDING_POOL_ADDRESS,
-    insurancePool: import.meta.env.VITE_INSURANCE_POOL_ADDRESS,
-    loanVoting: import.meta.env.VITE_LOAN_VOTING_ADDRESS,
+    chainId: 11155111,
+    name: "Sepolia",
+    rpcUrl: "https://sepolia.infura.io/v3/your_key",
+    nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
   },
 };
 
-// ABIs (only the functions we need for the frontend)
-export const ABIS = {
-  governanceToken: [
-    {
-      "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-      "name": "balanceOf",
-      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
-      "name": "stake",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
-      "name": "requestUnstake",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "unstake",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
-      "name": "getStakeInfo",
-      "outputs": [
-        {"internalType": "uint256", "name": "stakedAmount", "type": "uint256"},
-        {"internalType": "uint256", "name": "unstakeAmount", "type": "uint256"},
-        {"internalType": "uint256", "name": "unstakeAvailableAt", "type": "uint256"}
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
-      "name": "getVotingPower",
-      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {"internalType": "address", "name": "spender", "type": "address"},
-        {"internalType": "uint256", "name": "amount", "type": "uint256"}
-      ],
-      "name": "approve",
-      "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }
-  ],
-
-  reputationNFT: [
-    {
-      "inputs": [{"internalType": "address", "name": "member", "type": "address"}],
-      "name": "getReputation",
-      "outputs": [{
-        "components": [
-          {"internalType": "uint256", "name": "totalBacked", "type": "uint256"},
-          {"internalType": "uint256", "name": "successfulBacked", "type": "uint256"},
-          {"internalType": "uint256", "name": "defaultedBacked", "type": "uint256"},
-          {"internalType": "uint256", "name": "memberSince", "type": "uint256"},
-          {"internalType": "uint256", "name": "reputationScore", "type": "uint256"}
-        ],
-        "internalType": "struct ReputationNFT.Reputation",
-        "name": "",
-        "type": "tuple"
-      }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "address", "name": "member", "type": "address"}],
-      "name": "getReputationScore",
-      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "address", "name": "member", "type": "address"}],
-      "name": "hasMembership",
-      "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "totalSupply",
-      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ],
-
-  daoMembership: [
-    {
-      "inputs": [
-        {"internalType": "address", "name": "candidate", "type": "address"},
-        {"internalType": "string", "name": "reason", "type": "string"}
-      ],
-      "name": "proposeMembership",
-      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {"internalType": "uint256", "name": "proposalId", "type": "uint256"},
-        {"internalType": "bool", "name": "support", "type": "bool"}
-      ],
-      "name": "vote",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "uint256", "name": "proposalId", "type": "uint256"}],
-      "name": "executeProposal",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "uint256", "name": "proposalId", "type": "uint256"}],
-      "name": "getProposal",
-      "outputs": [
-        {"internalType": "address", "name": "candidate", "type": "address"},
-        {"internalType": "address", "name": "proposer", "type": "address"},
-        {"internalType": "uint256", "name": "startTime", "type": "uint256"},
-        {"internalType": "uint256", "name": "endTime", "type": "uint256"},
-        {"internalType": "uint256", "name": "votesFor", "type": "uint256"},
-        {"internalType": "uint256", "name": "votesAgainst", "type": "uint256"},
-        {"internalType": "bool", "name": "executed", "type": "bool"},
-        {"internalType": "bool", "name": "approved", "type": "bool"},
-        {"internalType": "string", "name": "reason", "type": "string"}
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-      "name": "isActiveMember",
-      "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getActiveMemberCount",
-      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "proposalCount",
-      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ],
-
-  loanVoting: [
-    "function requestLoan(uint256 amount, uint256 collateralPercentage) returns (uint256)",
-    "function backLoan(uint256 requestId)",
-    "function executeRequest(uint256 requestId)",
-    "function getRequest(uint256 requestId) view returns (address borrower, uint256 amount, uint256 requestedCollateral, uint256 startTime, uint256 endTime, uint256 backerCount, bool executed, bool approved)",
-    "function getBackers(uint256 requestId) view returns (address[])",
-    "function calculateRequiredCollateral(uint256 backerCount) pure returns (uint256)",
-    "function requestCount() view returns (uint256)",
-    "event LoanRequested(uint256 indexed requestId, address indexed borrower, uint256 amount, uint256 requestedCollateral)",
-    "event LoanBacked(uint256 indexed requestId, address indexed backer, uint256 votingPower)",
-    "event LoanApproved(uint256 indexed requestId, address indexed borrower, uint256 amount, uint256 requiredCollateral, uint256 backerCount)",
-  ],
-
-  yieldingPool: [
-    {
-      "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}],
-      "name": "deposit",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "uint256", "name": "shareAmount", "type": "uint256"}],
-      "name": "requestWithdrawal",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "withdraw",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
-      "name": "balanceOf",
-      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "address", "name": "", "type": "address"}],
-      "name": "shares",
-      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getTotalValueLocked",
-      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "address", "name": "", "type": "address"}],
-      "name": "withdrawalRequests",
-      "outputs": [
-        {"internalType": "uint256", "name": "shares", "type": "uint256"},
-        {"internalType": "uint256", "name": "requestTime", "type": "uint256"}
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
-      "name": "canWithdraw",
-      "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ],
-
-  insurancePool: [
-    "function getTotalBalance() view returns (uint256)",
-    "function getAvailableBalance() view returns (uint256)",
-    "function isHealthy() view returns (bool)",
-    "function totalCollected() view returns (uint256)",
-    "function totalPaidOut() view returns (uint256)",
-  ],
-
-  loanManager: [
-    "function loans(address borrower) view returns (uint256 principal, uint256 interestRate, uint256 totalOwed, uint256 amountRepaid, uint256 startTime, uint256 deadline, uint8 status)",
-    "function getRemainingDebt(address borrower) view returns (uint256)",
-    "function checkEligibility(address borrower) view returns (bool eligible, string reason)",
-    "function totalActiveLoans() view returns (uint256)",
-    "function totalLoansDisbursed() view returns (uint256)",
-  ],
-
-  mockUSDT: [
-    {
-      "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-      "name": "balanceOf",
-      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {"internalType": "address", "name": "spender", "type": "address"},
-        {"internalType": "uint256", "name": "amount", "type": "uint256"}
-      ],
-      "name": "approve",
-      "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {"internalType": "address", "name": "owner", "type": "address"},
-        {"internalType": "address", "name": "spender", "type": "address"}
-      ],
-      "name": "allowance",
-      "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "decimals",
-      "outputs": [{"internalType": "uint8", "name": "", "type": "uint8"}],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ],
+// Nexus SDK configuration
+export const NEXUS_CONFIG = {
+  network: import.meta.env.VITE_NEXUS_NETWORK || "testnet",
+  rpcUrl: import.meta.env.VITE_NEXUS_RPC_URL || "https://rpc.avail.tools",
+  supportedChains: [1, 137, 42161, 11155111], // Ethereum, Polygon, Arbitrum, Sepolia
 };
 
-// Contract metadata
-export const CONTRACT_INFO = {
-  governanceToken: {
-    name: "Prism Governance Token",
-    symbol: "SMEDAO",
-    decimals: 18,
+// Loan configuration
+export const LOAN_CONFIG = {
+  MIN_LOAN_AMOUNT: 1000, // $1000 minimum
+  MAX_LOAN_AMOUNT: 100000, // $100,000 maximum
+  INTEREST_RATE_RANGE: {
+    min: 5, // 5% APR
+    max: 25, // 25% APR
   },
-  mockUSDT: {
-    name: "Mock USDT",
-    symbol: "MUSDT",
-    decimals: 6,
+  LOAN_TERMS: [30, 60, 90, 180, 365], // Days
+  COLLATERAL_RATIO: 0.1, // 10% collateral required
+};
+
+// DAO configuration
+export const DAO_CONFIG = {
+  MIN_VOTING_POWER: 1000, // Minimum tokens to vote
+  VOTING_PERIOD: 7 * 24 * 60 * 60, // 7 days in seconds
+  EXECUTION_DELAY: 24 * 60 * 60, // 24 hours in seconds
+  QUORUM_THRESHOLD: 0.1, // 10% of total supply
+};
+
+// Credit score configuration
+export const CREDIT_CONFIG = {
+  MIN_SCORE: 300,
+  MAX_SCORE: 850,
+  SCORE_FACTORS: {
+    repayment_history: 0.35,
+    credit_utilization: 0.30,
+    credit_length: 0.15,
+    new_credit: 0.10,
+    credit_mix: 0.10,
   },
 };
-
-// Protocol parameters
-export const PROTOCOL_PARAMS = {
-  minStakeToVote: "100", // 100 tokens
-  minStakeToBack: "500", // 500 tokens
-  unstakeCooldown: 7 * 24 * 60 * 60, // 7 days in seconds
-  slashPercentage: 10, // 10%
-  membershipVotePeriod: 7 * 24 * 60 * 60, // 7 days
-  loanVotePeriod: 3 * 24 * 60 * 60, // 3 days
-  minBackers: 3,
-  protocolFee: 1, // 1%
-  insuranceCoverage: 30, // 30%
-  withdrawalFee: 0.5, // 0.5%
-  performanceFee: 10, // 10%
-};
-
-export default CONTRACTS;

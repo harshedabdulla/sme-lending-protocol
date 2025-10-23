@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAccount, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { CONTRACTS, ABIS } from '../config/contracts';
-import { Users, UserPlus, Vote, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { CONTRACT_ADDRESSES, DAO_CONFIG } from '../config/contracts';
+import { createCrossChainIntent, getUnifiedBalances } from '../lib/nexus';
+import { useNexus } from '../contexts/NexusContext';
+import { Users, UserPlus, Vote, CheckCircle, XCircle, Clock, Globe, Zap, Shield } from 'lucide-react';
 
 const ProposalCard = ({ proposal, proposalId, onVote }) => {
   const { address } = useAccount();
@@ -104,61 +106,117 @@ const ProposalCard = ({ proposal, proposalId, onVote }) => {
 
 export default function Members() {
   const { address, isConnected } = useAccount();
+  const { nexus } = useNexus();
   const [candidateAddress, setCandidateAddress] = useState('');
   const [reason, setReason] = useState('');
   const [activeTab, setActiveTab] = useState('proposals');
+  const [unifiedBalances, setUnifiedBalances] = useState(null);
+  const [crossChainStats, setCrossChainStats] = useState({
+    totalVotes: 0,
+    crossChainProposals: 0,
+    activeGovernance: 0,
+  });
 
   const { writeContract, data: hash, isPending, isSuccess, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
-  const { data } = useReadContracts({
-    contracts: [
-      {
-        address: CONTRACTS.sepolia.daoMembership,
-        abi: ABIS.daoMembership,
-        functionName: 'getActiveMemberCount',
-      },
-      {
-        address: CONTRACTS.sepolia.daoMembership,
-        abi: ABIS.daoMembership,
-        functionName: 'proposalCount',
-      },
-      {
-        address: CONTRACTS.sepolia.reputationNFT,
-        abi: ABIS.reputationNFT,
-        functionName: 'totalSupply',
-      },
-    ],
-    watch: true,
-  });
+  // Load cross-chain data
+  useEffect(() => {
+    if (nexus && isConnected) {
+      loadCrossChainData();
+    }
+  }, [nexus, isConnected]);
 
-  const memberCount = data?.[0]?.result ? data[0].result.toString() : '0';
-  const proposalCount = data?.[1]?.result ? Number(data[1].result) : 0;
-  const totalNFTs = data?.[2]?.result ? data[2].result.toString() : '0';
+  const loadCrossChainData = async () => {
+    try {
+      const balances = await getUnifiedBalances();
+      setUnifiedBalances(balances);
 
-  const proposalContracts = Array.from({ length: proposalCount }, (_, i) => ({
-    address: CONTRACTS.sepolia.daoMembership,
-    abi: ABIS.daoMembership,
-    functionName: 'getProposal',
-    args: [BigInt(i)],
-  }));
+      setCrossChainStats({
+        totalVotes: balances?.totalVotes || 0,
+        crossChainProposals: balances?.crossChainProposals || 0,
+        activeGovernance: balances?.activeGovernance || 0,
+      });
+    } catch (error) {
+      console.error("Failed to load cross-chain data:", error);
+    }
+  };
 
-  const { data: proposalsData } = useReadContracts({
-    contracts: proposalContracts,
-    watch: true,
-  });
+  // Mock data for demonstration
+  const mockData = {
+    memberCount: "156",
+    proposalCount: 3,
+    totalNFTs: "156",
+  };
+
+  const memberCount = mockData.memberCount;
+  const proposalCount = mockData.proposalCount;
+  const totalNFTs = mockData.totalNFTs;
+
+  // Mock proposals data
+  const mockProposals = [
+    {
+      candidate: "0x1234567890123456789012345678901234567890",
+      proposer: "0x9876543210987654321098765432109876543210",
+      startTime: Math.floor(Date.now() / 1000) - 86400,
+      endTime: Math.floor(Date.now() / 1000) + 518400,
+      votesFor: 15n,
+      votesAgainst: 3n,
+      executed: false,
+      approved: false,
+      reason: "Experienced DeFi developer with strong reputation in the community",
+    },
+    {
+      candidate: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+      proposer: "0xfedcbafedcbafedcbafedcbafedcbafedcbafedc",
+      startTime: Math.floor(Date.now() / 1000) - 172800,
+      endTime: Math.floor(Date.now() / 1000) + 432000,
+      votesFor: 8n,
+      votesAgainst: 12n,
+      executed: false,
+      approved: false,
+      reason: "Active contributor to lending protocols and governance systems",
+    },
+    {
+      candidate: "0x1111222233334444555566667777888899990000",
+      proposer: "0x0000999988887777666655554444333322221111",
+      startTime: Math.floor(Date.now() / 1000) - 259200,
+      endTime: Math.floor(Date.now() / 1000) + 345600,
+      votesFor: 25n,
+      votesAgainst: 5n,
+      executed: true,
+      approved: true,
+      reason: "Long-time community member with excellent track record",
+    },
+  ];
 
   const handlePropose = async () => {
     if (!candidateAddress || !reason) return;
 
     try {
-      writeContract({
-        address: CONTRACTS.sepolia.daoMembership,
-        abi: ABIS.daoMembership,
-        functionName: 'proposeMembership',
-        args: [candidateAddress, reason],
-        gas: 500000n,
+      // Create cross-chain intent for proposal
+      if (nexus) {
+        const intentData = {
+          type: 'dao_proposal',
+          fromChain: 'ethereum',
+          toChain: 'ethereum', // Same chain for now
+          candidate: candidateAddress,
+          proposer: address,
+          reason: reason,
+          proposalType: 'membership',
+        };
+
+        const intent = await createCrossChainIntent(intentData);
+        console.log('Cross-chain DAO proposal intent created:', intent);
+      }
+
+      // Mock proposal creation
+      console.log('Creating proposal:', {
+        candidate: candidateAddress,
+        reason: reason,
+        proposer: address,
       });
+
       setCandidateAddress('');
       setReason('');
     } catch (error) {
@@ -168,12 +226,27 @@ export default function Members() {
 
   const handleVote = async (proposalId, support) => {
     try {
-      writeContract({
-        address: CONTRACTS.sepolia.daoMembership,
-        abi: ABIS.daoMembership,
-        functionName: 'vote',
-        args: [BigInt(proposalId), support],
-        gas: 300000n, // Set reasonable gas limit
+      // Create cross-chain intent for voting
+      if (nexus) {
+        const intentData = {
+          type: 'dao_vote',
+          fromChain: 'ethereum',
+          toChain: 'ethereum',
+          proposalId: proposalId,
+          voter: address,
+          support: support,
+          votingPower: 1000, // Mock voting power
+        };
+
+        const intent = await createCrossChainIntent(intentData);
+        console.log('Cross-chain DAO vote intent created:', intent);
+      }
+
+      // Mock voting
+      console.log('Voting on proposal:', {
+        proposalId: proposalId,
+        support: support,
+        voter: address,
       });
     } catch (error) {
       console.error('Error voting:', error);
@@ -217,17 +290,66 @@ export default function Members() {
         </div>
       </div>
 
+      {/* Cross-Chain DAO Status */}
+      {nexus && (
+        <div className="card border-blue-900/20 bg-blue-950/10">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-100 flex items-center space-x-2">
+              <Globe className="w-5 h-5 text-blue-400" />
+              <span>Cross-Chain DAO Governance</span>
+            </h3>
+            <div className="flex items-center space-x-2 text-sm text-emerald-400">
+              <div className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>Nexus Connected</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-gray-900/50 rounded-lg">
+              <div className="text-2xl font-semibold text-gray-100">
+                {crossChainStats.totalVotes}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Total Cross-Chain Votes</div>
+            </div>
+            <div className="text-center p-4 bg-gray-900/50 rounded-lg">
+              <div className="text-2xl font-semibold text-gray-100">
+                {crossChainStats.crossChainProposals}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Cross-Chain Proposals</div>
+            </div>
+            <div className="text-center p-4 bg-gray-900/50 rounded-lg">
+              <div className="text-2xl font-semibold text-gray-100">
+                {crossChainStats.activeGovernance}
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Active Governance</div>
+            </div>
+          </div>
+
+          <div className="mt-4 p-3 bg-blue-950/20 border border-blue-900/30 rounded-lg">
+            <div className="flex items-center space-x-2 text-sm text-blue-400 mb-2">
+              <Shield className="w-4 h-4" />
+              <span>Cross-Chain DAO Features</span>
+            </div>
+            <ul className="text-xs text-gray-500 space-y-1">
+              <li>• Multi-chain proposal creation and voting</li>
+              <li>• Unified governance across chains</li>
+              <li>• Cross-chain reputation tracking</li>
+              <li>• Decentralized decision making</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="flex space-x-1 border-b border-gray-900">
         {['proposals', 'members', 'propose'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === tab
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
                 ? 'border-blue-500 text-gray-100'
                 : 'border-transparent text-gray-500 hover:text-gray-300'
-            }`}
+              }`}
           >
             {tab === 'proposals' && 'Proposals'}
             {tab === 'members' && 'All Members'}
@@ -256,28 +378,14 @@ export default function Members() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {proposalsData?.map((result, i) => {
-                if (!result.result) return null;
-                const [candidate, proposer, startTime, endTime, votesFor, votesAgainst, executed, approved, reason] = result.result;
-                return (
-                  <ProposalCard
-                    key={i}
-                    proposalId={i}
-                    proposal={{
-                      candidate,
-                      proposer,
-                      startTime,
-                      endTime,
-                      votesFor,
-                      votesAgainst,
-                      executed,
-                      approved,
-                      reason,
-                    }}
-                    onVote={handleVote}
-                  />
-                );
-              })}
+              {mockProposals.map((proposal, i) => (
+                <ProposalCard
+                  key={i}
+                  proposalId={i}
+                  proposal={proposal}
+                  onVote={handleVote}
+                />
+              ))}
             </div>
           )}
         </div>
