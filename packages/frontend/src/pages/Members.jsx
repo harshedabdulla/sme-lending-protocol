@@ -3,8 +3,9 @@ import { useAccount, useReadContracts, useWriteContract, useWaitForTransactionRe
 import { CONTRACT_ADDRESSES, ABIS, DAO_CONFIG } from '../config/contracts';
 import { Users, UserPlus, Vote, CheckCircle, XCircle, Clock, Globe, Zap, Shield } from 'lucide-react';
 import { useNexus } from '../contexts/NexusContext';
+import { useNexus } from '../contexts/NexusContext';
 
-const ProposalCard = ({ proposal, proposalId, onVote, onExecute }) => {
+const ProposalCard = ({ proposal, proposalId, onVote, onExecute, onExecute }) => {
   const { address } = useAccount();
 
   const totalVotes = proposal.votesFor + proposal.votesAgainst;
