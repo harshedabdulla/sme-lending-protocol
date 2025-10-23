@@ -20,21 +20,42 @@ export function initNexus(walletProvider) {
                 };
             },
             getUnifiedBalances: async () => {
+                // Simulate dynamic balance fetching
+                const baseAmount = Math.random() * 50000 + 10000; // Random between 10k-60k
+                const ethAmount = Math.random() * 5 + 1; // Random between 1-6 ETH
+                const maticAmount = Math.random() * 200 + 50; // Random between 50-250 MATIC
+
                 return {
                     balances: {
-                        ethereum: { USDT: 10000, ETH: 2.5 },
-                        polygon: { USDT: 5000, MATIC: 100 },
-                        arbitrum: { USDT: 3000, ETH: 1.2 }
+                        ethereum: {
+                            USDT: Math.floor(baseAmount),
+                            ETH: parseFloat(ethAmount.toFixed(2)),
+                            USD: Math.floor(baseAmount * 1.02) // Slightly higher USD value
+                        },
+                        polygon: {
+                            USDT: Math.floor(baseAmount * 0.6),
+                            MATIC: Math.floor(maticAmount),
+                            USD: Math.floor(baseAmount * 0.58)
+                        },
+                        arbitrum: {
+                            USDT: Math.floor(baseAmount * 0.4),
+                            ETH: parseFloat((ethAmount * 0.8).toFixed(2)),
+                            USD: Math.floor(baseAmount * 0.38)
+                        }
                     },
-                    totalVolume: 50000,
-                    pendingIntents: [],
-                    totalYield: 2500,
-                    crossChainDeposits: 15,
+                    totalVolume: Math.floor(baseAmount * 2.5),
+                    pendingIntents: [
+                        { id: 'intent_1', type: 'loan_request', status: 'pending' },
+                        { id: 'intent_2', type: 'yield_deposit', status: 'processing' }
+                    ],
+                    totalYield: Math.floor(baseAmount * 0.05),
+                    crossChainDeposits: Math.floor(Math.random() * 20) + 10,
                     strategies: {
                         ethereum: { apy: 8.5, tvl: 1000000 },
                         polygon: { apy: 12.3, tvl: 500000 },
                         arbitrum: { apy: 10.7, tvl: 300000 }
-                    }
+                    },
+                    lastUpdated: new Date().toISOString()
                 };
             }
         };
