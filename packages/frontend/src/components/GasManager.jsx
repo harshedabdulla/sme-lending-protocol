@@ -44,12 +44,12 @@ const GasManager = () => {
 
     const handleGasRefuel = async () => {
         if (!refuelAmount || !nexus) {
-            console.log('❌ Missing refuel amount or Nexus not connected');
+            console.log('Missing refuel amount or Nexus not connected');
             return;
         }
 
-        console.log('🚀 Starting cross-chain gas refuel...');
-        console.log('📊 Gas refuel details:', {
+        console.log('Starting cross-chain gas refuel...');
+        console.log('Gas refuel details:', {
             amount: refuelAmount,
             targetChain: selectedChain,
             user: address,
@@ -71,23 +71,23 @@ const GasManager = () => {
             console.log('🔗 Creating cross-chain gas refuel intent:', intentData);
 
             const intent = await createCrossChainIntent(intentData);
-            console.log('✅ Cross-chain gas refuel intent created:', intent);
-            console.log('🎯 Intent ID:', intent.id);
-            console.log('📈 Intent Status:', intent.status);
-            console.log('⏰ Created at:', new Date(intent.timestamp).toLocaleString());
+            console.log('Cross-chain gas refuel intent created:', intent);
+            console.log('Intent ID:', intent.id);
+            console.log('Intent Status:', intent.status);
+            console.log('Created at:', new Date(intent.timestamp).toLocaleString());
 
             // Simulate refuel completion
-            console.log('💰 Processing gas refuel transaction...');
+            console.log('Processing gas refuel transaction...');
             setTimeout(() => {
-                console.log('✅ Gas refuel completed successfully!');
-                console.log('🎯 Transaction hash: 0x' + Math.random().toString(16).substr(2, 64));
-                console.log('🎉 Cross-chain gas refuel completed!');
+                console.log('Gas refuel completed successfully!');
+                console.log('Transaction hash: 0x' + Math.random().toString(16).substr(2, 64));
+                console.log('Cross-chain gas refuel completed!');
                 setIsRefueling(false);
                 setRefuelAmount('');
             }, 3000);
         } catch (error) {
-            console.error('❌ Failed to create gas refuel intent:', error);
-            console.error('🔍 Error details:', error.message);
+            console.error('Failed to create gas refuel intent:', error);
+            console.error('Error details:', error.message);
             setIsRefueling(false);
         }
     };
