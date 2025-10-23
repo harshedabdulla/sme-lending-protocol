@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAccount, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
-import { CONTRACT_ADDRESSES, LOAN_CONFIG, CHAIN_CONFIG } from '../config/contracts';
-import { createCrossChainIntent, getUnifiedBalances } from '../lib/nexus';
+import { CONTRACT_ADDRESSES, ABIS, LOAN_CONFIG, CHAIN_CONFIG } from '../config/contracts';
 import { Coins, Users, Clock, Globe, Zap, ArrowRight } from 'lucide-react';
+import { createCrossChainIntent, getUnifiedBalances } from '../lib/nexus';
 import { useNexus } from '../contexts/NexusContext';
 
-// LoanRequestCard component
-const LoanRequestCard = ({ request, requestId, onBack, nexus }) => {
+// Helper to support both nested and flat contract address objects
+const getContractAddress = (key) => {
+  return CONTRACT_ADDRESSES?.sepolia?.[key] || CONTRACT_ADDRESSES?.[key];
+};
+
+
+const LoanRequestCard = ({ request, requestId, onBack, userVotingPower, userAddress, isMember, nexus }) => {
   const { address } = useAccount();
 
   const requiredCollateral = request.backerCount
@@ -15,7 +20,13 @@ const LoanRequestCard = ({ request, requestId, onBack, nexus }) => {
     : 100;
 
   const isExecutable = request.backerCount >= 3 && !request.executed;
-  const canBack = address && address !== request.borrower && !request.executed;
+  const isOwnLoan = userAddress && userAddress.toLowerCase() === request.borrower.toLowerCase();
+  const votingPeriodEnded = Number(request.endTime) <= Date.now() / 1000;
+  const hasEnoughStake = userVotingPower >= 500; // MIN_STAKE_TO_BACK = 500 tokens
+  const canBack = userAddress && !isOwnLoan && !request.executed && !votingPeriodEnded;
+  const secondsLeft = Math.max(0, Number(request.endTime) - Date.now() / 1000);
+  const minutesLeft = Math.ceil(secondsLeft / 60);
+  const timeLeftDisplay = minutesLeft > 0 ? `${minutesLeft} min` : 'Ended';
   const daysLeft = Math.ceil((Number(request.endTime) - Date.now() / 1000) / 86400);
 
   const handleNexusBack = async () => {
@@ -32,6 +43,28 @@ const LoanRequestCard = ({ request, requestId, onBack, nexus }) => {
       console.error('Nexus backLoan failed', err);
     }
   };
+
+
+  // Debug log
+  console.log(`Loan ${requestId} - Backing checks:`, {
+    userAddress,
+    borrower: request.borrower,
+    isMember,
+    isOwnLoan,
+    hasEnoughStake,
+    votingPower: userVotingPower,
+    votingPeriodEnded,
+    executed: request.executed
+  });
+
+  // Detailed reason why user can't back
+  let backingBlockedReason = '';
+  if (!userAddress) backingBlockedReason = 'Connect wallet';
+  else if (!isMember) backingBlockedReason = 'Not a DAO member';
+  else if (isOwnLoan) backingBlockedReason = 'Cannot back own loan';
+  else if (votingPeriodEnded) backingBlockedReason = 'Voting period ended';
+  else if (request.executed) backingBlockedReason = 'Already executed';
+  else if (!hasEnoughStake) backingBlockedReason = `Need 500 staked (have ${userVotingPower.toFixed(0)})`;
 
   return (
     <div className="card-hover">
@@ -87,24 +120,44 @@ const LoanRequestCard = ({ request, requestId, onBack, nexus }) => {
       {!request.executed && (
         <div className="flex items-center space-x-2 text-xs text-gray-500 mb-4">
           <Clock className="w-3.5 h-3.5" />
+          <span>Ends in {timeLeftDisplay}</span>
+        </div>
+      )}
+      {!request.executed && (
+        <div className="flex items-center space-x-2 text-xs text-gray-500 mb-4">
+          <Clock className="w-3.5 h-3.5" />
           <span>Ends in {daysLeft} days</span>
         </div>
       )}
 
       {!request.executed && (
-        <div className="flex space-x-2">
-          {canBack && (
-            <button onClick={handleNexusBack} className="flex-1 btn-secondary">
-              Back Loan
-            </button>
+        <div className="space-y-2">
+          {backingBlockedReason && (
+            <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded p-2">
+              ⚠️ {backingBlockedReason}
+            </div>
           )}
-          {isExecutable && (
-            <button className="flex-1 btn-primary">
-              Execute
-            </button>
-          )}
+
+          <div className="flex space-x-2">
+            {userAddress && !isOwnLoan && canBack && (
+              <button
+                onClick={handleNexusBack || (() => onBack(requestId))}
+                disabled={!canBack || !hasEnoughStake || !isMember}
+                className="flex-1 btn-secondary"
+              >
+                Back Loan
+              </button>
+            )}
+
+            {isExecutable && (
+              <button className="flex-1 btn-primary">
+                Execute
+              </button>
+            )}
+          </div>
         </div>
       )}
+
     </div>
   );
 };
@@ -118,12 +171,12 @@ const CrossChainLoanRequest = ({ onRequestLoan, nexus }) => {
 
   const handleCrossChainRequest = async () => {
     if (!amount || !nexus) {
-      console.log('❌ Missing amount or Nexus not connected');
+      console.log('Missing amount or Nexus not connected');
       return;
     }
 
-    console.log('🚀 Starting cross-chain loan request...');
-    console.log('📊 Request details:', {
+    console.log('Starting cross-chain loan request...');
+    console.log('Request details:', {
       amount,
       selectedChain,
       collateral,
@@ -143,20 +196,20 @@ const CrossChainLoanRequest = ({ onRequestLoan, nexus }) => {
         token: 'USDT',
       };
 
-      console.log('🔗 Creating cross-chain intent with data:', intentData);
+      console.log('Creating cross-chain intent with data:', intentData);
 
       const intent = await createCrossChainIntent(intentData);
-      console.log('✅ Cross-chain loan intent created successfully:', intent);
-      console.log('🎯 Intent ID:', intent.id);
-      console.log('📈 Intent Status:', intent.status);
-      console.log('⏰ Created at:', new Date(intent.timestamp).toLocaleString());
+      console.log('Cross-chain loan intent created successfully:', intent);
+      console.log('Intent ID:', intent.id);
+      console.log('Intent Status:', intent.status);
+      console.log('Created at:', new Date(intent.timestamp).toLocaleString());
 
       // Call the original request function
       await onRequestLoan(amount, collateral, intent);
-      console.log('🎉 Cross-chain loan request submitted successfully!');
+      console.log('Cross-chain loan request submitted successfully!');
     } catch (error) {
-      console.error('❌ Failed to create cross-chain loan intent:', error);
-      console.error('🔍 Error details:', error.message);
+      console.error('Failed to create cross-chain loan intent:', error);
+      console.error('Error details:', error.message);
     } finally {
       setIsCreatingIntent(false);
     }
@@ -248,92 +301,172 @@ const CrossChainLoanRequest = ({ onRequestLoan, nexus }) => {
   );
 };
 
-// Loans page component
 export default function Loans() {
   const { address, isConnected } = useAccount();
   const { nexus } = useNexus();
-  const [amount, setAmount] = useState('');
-  const [collateral, setCollateral] = useState('100');
-  const [activeTab, setActiveTab] = useState('browse');
+
+  const [amount, setAmount] = useState("");
+  const [collateral, setCollateral] = useState("100");
+  const [activeTab, setActiveTab] = useState("browse");
+  const [error, setError] = useState("");
   const [unifiedBalances, setUnifiedBalances] = useState(null);
 
-  const { writeContract, data: hash } = useWriteContract();
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
+  const { writeContract, data: hash, error: writeError } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
-  // Load unified balances
-  useEffect(() => {
-    if (nexus && isConnected) {
-      loadUnifiedBalances();
-    }
-  }, [nexus, isConnected]);
+  // // 🔹 Load Unified Balances from Nexus
+  // useEffect(() => {
+  //   if (nexus && isConnected) {
+  //     loadUnifiedBalances();
+  //   }
+  // }, [nexus, isConnected]);
 
+  // const loadUnifiedBalances = async () => {
+  //   try {
+  //     const balances = await getUnifiedBalances();
+  //     setUnifiedBalances(balances);
+  //   } catch (error) {
+  //     console.error("Failed to load unified balances:", error);
+  //   }
+  // };
   const loadUnifiedBalances = async () => {
+    if (!nexus) {
+      console.warn("Nexus not initialized yet");
+      return;
+    }
     try {
-      const balances = await getUnifiedBalances();
+      const balances = await nexus.getUnifiedBalances();
       setUnifiedBalances(balances);
-    } catch (error) {
-      console.error("Failed to load unified balances:", error);
+    } catch (err) {
+      console.error("Failed to load unified balances:", err);
     }
   };
 
-  // Mock data for demonstration
-  const mockRequests = [
-    {
-      borrower: "0x1234...5678",
-      amount: parseUnits("5000", 6),
-      requestedCollateral: 100n,
-      startTime: Math.floor(Date.now() / 1000) - 86400,
-      endTime: Math.floor(Date.now() / 1000) + 604800,
-      backerCount: 2n,
-      executed: false,
-      approved: false,
-    },
-    {
-      borrower: "0x8765...4321",
-      amount: parseUnits("15000", 6),
-      requestedCollateral: 80n,
-      startTime: Math.floor(Date.now() / 1000) - 172800,
-      endTime: Math.floor(Date.now() / 1000) + 432000,
-      backerCount: 5n,
-      executed: false,
-      approved: false,
-    },
-  ];
+  // 🔹 Get Loan Request Data
+  const { data: requestCountData } = useReadContracts({
+    contracts: [
+      {
+        address: getContractAddress("loanVoting"),
+        abi: ABIS.loanVoting,
+        functionName: "requestCount",
+      },
+    ],
+    watch: true,
+  });
 
-  // Request loan via contract
-  const handleRequestLoan = async (loanAmount, loanCollateral, intent = null) => {
-    if (!loanAmount) return;
+  const requestCount = requestCountData?.[0]?.result ? Number(requestCountData[0].result) : 0;
+
+  const requestContracts = Array.from({ length: requestCount }, (_, i) => ({
+    address: getContractAddress("loanVoting"),
+    abi: ABIS.loanVoting,
+    functionName: "getRequest",
+    args: [BigInt(i)],
+  }));
+
+  const { data: requestsData } = useReadContracts({
+    contracts: requestContracts,
+    watch: true,
+  });
+
+  // 🔹 Eligibility + Credit Score
+  const { data: eligibilityData } = useReadContracts({
+    contracts: [
+      {
+        address: getContractAddress("daoMembership"),
+        abi: ABIS.daoMembership,
+        functionName: "isActiveMember",
+        args: address ? [address] : undefined,
+      },
+      {
+        address: getContractAddress("loanManager"),
+        abi: ABIS.loanManager,
+        functionName: "checkEligibility",
+        args: address ? [address] : undefined,
+      },
+      {
+        address: getContractAddress("creditScore"),
+        abi: [
+          {
+            inputs: [{ internalType: "address", name: "user", type: "address" }],
+            name: "getScore",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+        ],
+        functionName: "getScore",
+        args: address ? [address] : undefined,
+      },
+    ],
+    watch: true,
+  });
+
+  const isActiveMember = eligibilityData?.[0]?.result ?? false;
+  const eligibilityResult = eligibilityData?.[1]?.result;
+  const isEligible = eligibilityResult?.[0] ?? false;
+  const eligibilityReason = eligibilityResult?.[1] ?? "";
+  const creditScore = eligibilityData?.[2]?.result ? Number(eligibilityData[2].result) : 0;
+
+  // 🔹 Voting Power for Backing Loans
+  const { data: votingPowerData } = useReadContracts({
+    contracts: [
+      {
+        address: getContractAddress("governanceToken"),
+        abi: ABIS.governanceToken,
+        functionName: "getVotingPower",
+        args: address ? [address] : undefined,
+      },
+    ],
+    watch: true,
+  });
+
+  const votingPower = votingPowerData?.[0]?.result
+    ? Number(formatUnits(votingPowerData[0].result, 18))
+    : 0;
+
+  // 🔹 Request Loan
+  const handleRequestLoan = async (loanAmount = amount, loanCollateral = collateral, intent = null) => {
+    if (!loanAmount || !loanCollateral) return;
+    setError("");
 
     try {
-      // If we have a cross-chain intent, log it
-      if (intent) {
-        console.log('Processing loan with cross-chain intent:', intent);
-      }
+      const amountInWei = parseUnits(loanAmount, 6);
+      const collateralPct = BigInt(loanCollateral);
 
-      // Mock contract interaction
-      console.log('Requesting loan:', {
+      console.log("Requesting loan:", {
         amount: loanAmount,
+        amountInWei: amountInWei.toString(),
         collateral: loanCollateral,
         borrower: address,
-        intent: intent?.id,
+        intent: intent?.id || null,
       });
 
-      // Simulate transaction
-      setTimeout(() => {
-        console.log('Loan request submitted successfully');
-      }, 2000);
-    } catch (error) {
-      console.error('Error requesting loan:', error);
+      writeContract({
+        address: getContractAddress("loanVoting"),
+        abi: ABIS.loanVoting,
+        functionName: "requestLoan",
+        args: [amountInWei, collateralPct],
+        gas: 500000n,
+      });
+    } catch (err) {
+      console.error("Error requesting loan:", err);
+      setError(err.message || "Failed to request loan");
     }
   };
 
-  // Back loan via contract
+  // 🔹 Back Loan
   const handleBackLoan = async (requestId) => {
     try {
-      console.log('Backing loan request:', requestId);
-      // Mock transaction
+      console.log("Backing loan request:", requestId);
+      writeContract({
+        address: getContractAddress("loanVoting"),
+        abi: ABIS.loanVoting,
+        functionName: "backLoan",
+        args: [BigInt(requestId)],
+        gas: 500000n,
+      });
     } catch (error) {
-      console.error('Error backing loan:', error);
+      console.error("Error backing loan:", error);
     }
   };
 
@@ -349,29 +482,29 @@ export default function Loans() {
 
       {/* Tabs */}
       <div className="flex space-x-1 border-b border-gray-900">
-        {['browse', 'request', 'crossChain', 'myLoans'].map((tab) => (
+        {["browse", "request", "crossChain", "myLoans"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
-              ? 'border-blue-500 text-gray-100'
-              : 'border-transparent text-gray-500 hover:text-gray-300'
+              ? "border-blue-500 text-gray-100"
+              : "border-transparent text-gray-500 hover:text-gray-300"
               }`}
           >
-            {tab === 'browse' && 'Browse'}
-            {tab === 'request' && 'Request Loan'}
-            {tab === 'crossChain' && 'Cross-Chain'}
-            {tab === 'myLoans' && 'My Loans'}
+            {tab === "browse" && "Browse"}
+            {tab === "request" && "Request Loan"}
+            {tab === "crossChain" && "Cross-Chain"}
+            {tab === "myLoans" && "My Loans"}
           </button>
         ))}
       </div>
 
       {/* Browse Tab */}
-      {activeTab === 'browse' && (
+      {activeTab === "browse" && (
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-gray-100">
-              Active Requests ({mockRequests.length})
+              Active Requests ({requestCount})
             </h2>
             {nexus && (
               <div className="flex items-center space-x-2 text-sm text-blue-400">
@@ -388,32 +521,56 @@ export default function Loans() {
                 Connect your wallet to view and back loan requests
               </p>
             </div>
-          ) : mockRequests.length === 0 ? (
+          ) : requestCount === 0 ? (
             <div className="card text-center py-12">
               <Coins className="w-12 h-12 text-gray-700 mx-auto mb-4" />
               <p className="text-sm text-gray-400 mb-2">No active loan requests</p>
-              <p className="text-xs text-gray-600">
-                Be the first to request a loan
-              </p>
+              <p className="text-xs text-gray-600">Be the first to request a loan</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockRequests.map((request, i) => (
-                <LoanRequestCard
-                  key={i}
-                  requestId={i}
-                  request={request}
-                  onBack={handleBackLoan}
-                  nexus={nexus}
-                />
-              ))}
+              {requestsData?.map((result, i) => {
+                if (!result.result) return null;
+                const [
+                  borrower,
+                  amount,
+                  requestedCollateral,
+                  startTime,
+                  endTime,
+                  backerCount,
+                  executed,
+                  approved,
+                ] = result.result;
+
+                return (
+                  <LoanRequestCard
+                    key={i}
+                    requestId={i}
+                    request={{
+                      borrower,
+                      amount,
+                      requestedCollateral,
+                      startTime,
+                      endTime,
+                      backerCount,
+                      executed,
+                      approved,
+                    }}
+                    onBack={handleBackLoan}
+                    userVotingPower={votingPower}
+                    userAddress={address}
+                    isMember={isActiveMember}
+                    nexus={nexus}
+                  />
+                );
+              })}
             </div>
           )}
         </div>
       )}
 
       {/* Cross-Chain Tab */}
-      {activeTab === 'crossChain' && (
+      {activeTab === "crossChain" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-100 flex items-center space-x-2">
@@ -440,25 +597,35 @@ export default function Loans() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <CrossChainLoanRequest onRequestLoan={handleRequestLoan} nexus={nexus} />
 
-              {/* Unified Balances */}
               {unifiedBalances && (
                 <div className="card">
-                  <h3 className="text-lg font-semibold text-gray-100 mb-4">Unified Balances</h3>
+                  <h3 className="text-lg font-semibold text-gray-100 mb-4">
+                    Unified Balances
+                  </h3>
                   <div className="space-y-3">
-                    {Object.entries(unifiedBalances.balances || {}).map(([chain, balance]) => (
-                      <div key={chain} className="flex justify-between items-center p-3 bg-gray-900/50 rounded-lg">
-                        <div className="flex items-center space-x-2">
-                          <div className="w-2 h-2 rounded-full bg-blue-400" />
-                          <span className="text-sm text-gray-300 capitalize">{chain}</span>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-medium text-gray-100">
-                            {balance.USDT ? `$${balance.USDT.toLocaleString()}` : 'N/A'}
+                    {Object.entries(unifiedBalances.balances || {}).map(
+                      ([chain, balance]) => (
+                        <div
+                          key={chain}
+                          className="flex justify-between items-center p-3 bg-gray-900/50 rounded-lg"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-400" />
+                            <span className="text-sm text-gray-300 capitalize">
+                              {chain}
+                            </span>
                           </div>
-                          <div className="text-xs text-gray-500">USDT</div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-gray-100">
+                              {balance.USDT
+                                ? `$${balance.USDT.toLocaleString()}`
+                                : "N/A"}
+                            </div>
+                            <div className="text-xs text-gray-500">USDT</div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
 
                   <div className="mt-4 p-3 bg-blue-950/20 border border-blue-900/30 rounded-lg">
@@ -480,11 +647,13 @@ export default function Loans() {
         </div>
       )}
 
-      {/* Request Tab */}
-      {activeTab === 'request' && (
+      {/* Request Loan Tab */}
+      {activeTab === "request" && (
         <div className="max-w-2xl">
           <div className="card-bordered">
-            <h2 className="text-lg font-semibold text-gray-100 mb-6">Request a Loan</h2>
+            <h2 className="text-lg font-semibold text-gray-100 mb-6">
+              Request a Loan
+            </h2>
 
             <div className="space-y-5">
               <div>
@@ -520,24 +689,40 @@ export default function Loans() {
 
               <button
                 onClick={handleRequestLoan}
-                disabled={!amount || isConfirming || !isConnected}
+                disabled={!amount || !collateral || isConfirming || !isConnected}
                 className="w-full btn-primary"
               >
-                {isConfirming ? 'Confirming...' : 'Submit Request'}
+                {isConfirming ? "Confirming..." : "Submit Loan Request"}
               </button>
 
-              {!isConnected && (
-                <p className="text-sm text-center text-gray-600">
-                  Connect wallet to request a loan
-                </p>
+              {error && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <p className="text-sm text-red-400">{error}</p>
+                </div>
+              )}
+
+              {writeError && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <p className="text-sm text-red-400">
+                    Transaction failed: {writeError.message}
+                  </p>
+                </div>
+              )}
+
+              {isSuccess && (
+                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                  <p className="text-sm text-emerald-400">
+                    Loan request submitted successfully!
+                  </p>
+                </div>
               )}
             </div>
           </div>
         </div>
       )}
 
-      {/* My Loans Tab */}
-      {activeTab === 'myLoans' && (
+      {/* My Loans */}
+      {activeTab === "myLoans" && (
         <div>
           {!isConnected ? (
             <div className="card text-center py-12">
@@ -549,9 +734,7 @@ export default function Loans() {
           ) : (
             <div className="card text-center py-12">
               <Coins className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-              <p className="text-sm text-gray-400">
-                No active loans found
-              </p>
+              <p className="text-sm text-gray-400">No active loans found</p>
             </div>
           )}
         </div>
