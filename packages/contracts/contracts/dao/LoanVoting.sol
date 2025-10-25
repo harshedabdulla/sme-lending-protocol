@@ -196,8 +196,10 @@ contract LoanVoting is Ownable, ReentrancyGuard {
         if (request.backerCount >= minBackers && request.requestedCollateral >= requiredCollateral) {
             request.approved = true;
 
-            // Approve loan through LoanManager
-            // Note: This is a simplified flow. In production, you'd need proper collateral handling
+            // Create loan through LoanManager
+            // LoanManager will handle the actual fund transfer to the borrower
+            loanManager.approveLoanFromVoting(request.borrower, request.amount);
+
             emit LoanApproved(
                 requestId,
                 request.borrower,
