@@ -482,35 +482,64 @@ export const CHAIN_CONFIG = {
     nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   },
   sepolia: {
-    // Base Protocol Contracts
-    mockUSDT: import.meta.env.VITE_MOCK_USDT_ADDRESS,
-    creditScore: import.meta.env.VITE_CREDIT_SCORE_ADDRESS,
-    lendingPool: import.meta.env.VITE_LENDING_POOL_ADDRESS,
-    loanManager: import.meta.env.VITE_LOAN_MANAGER_ADDRESS,
-
-    // DAO Governance Contracts
-    governanceToken: import.meta.env.VITE_GOVERNANCE_TOKEN_ADDRESS,
-    reputationNFT: import.meta.env.VITE_REPUTATION_NFT_ADDRESS,
-    daoMembership: import.meta.env.VITE_DAO_MEMBERSHIP_ADDRESS,
-    yieldingPool: import.meta.env.VITE_YIELDING_POOL_ADDRESS,
-    insurancePool: import.meta.env.VITE_INSURANCE_POOL_ADDRESS,
-    loanVoting: import.meta.env.VITE_LOAN_VOTING_ADDRESS,
+    chainId: 11155111,
+    name: "Sepolia",
+    rpcUrl: "https://sepolia.infura.io/v3/your_key",
+    nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 },
   },
 };
 
-// Protocol parameters
+// Nexus SDK configuration
+export const NEXUS_CONFIG = {
+  network: import.meta.env.VITE_NEXUS_NETWORK || "testnet",
+  rpcUrl: import.meta.env.VITE_NEXUS_RPC_URL || "https://rpc.avail.tools",
+  supportedChains: [1, 137, 42161, 11155111], // Ethereum, Polygon, Arbitrum, Sepolia
+};
+
+// Loan configuration
+export const LOAN_CONFIG = {
+  MIN_LOAN_AMOUNT: 1000, // $1000 minimum
+  MAX_LOAN_AMOUNT: 100000, // $100,000 maximum
+  INTEREST_RATE_RANGE: {
+    min: 5, // 5% APR
+    max: 25, // 25% APR
+  },
+  LOAN_TERMS: [30, 60, 90, 180, 365], // Days
+  COLLATERAL_RATIO: 0.1, // 10% collateral required
+};
+
+// DAO configuration
+export const DAO_CONFIG = {
+  MIN_VOTING_POWER: 1000, // Minimum tokens to vote
+  VOTING_PERIOD: 7 * 24 * 60 * 60, // 7 days in seconds
+  EXECUTION_DELAY: 24 * 60 * 60, // 24 hours in seconds
+  QUORUM_THRESHOLD: 0.1, // 10% of total supply
+};
+
+// Credit score configuration
+export const CREDIT_CONFIG = {
+  MIN_SCORE: 300,
+  MAX_SCORE: 850,
+  SCORE_FACTORS: {
+    repayment_history: 0.35,
+    credit_utilization: 0.30,
+    credit_length: 0.15,
+    new_credit: 0.10,
+    credit_mix: 0.10,
+  },
+};
+
+// Protocol parameters (UPDATED FOR DEMO - 5 minutes instead of days)
 export const PROTOCOL_PARAMS = {
   minStakeToVote: "100", // 100 tokens
   minStakeToBack: "500", // 500 tokens
-  unstakeCooldown: 7 * 24 * 60 * 60, // 7 days in seconds
+  unstakeCooldown: 5 * 60, // 5 minutes in seconds (was 7 days)
   slashPercentage: 10, // 10%
-  membershipVotePeriod: 7 * 24 * 60 * 60, // 7 days
-  loanVotePeriod: 3 * 24 * 60 * 60, // 3 days
+  membershipVotePeriod: 5 * 60, // 5 minutes in seconds (was 7 days)
+  loanVotePeriod: 5 * 60, // 5 minutes in seconds (was 3 days)
   minBackers: 3,
   protocolFee: 1, // 1%
   insuranceCoverage: 30, // 30%
   withdrawalFee: 0.5, // 0.5%
   performanceFee: 10, // 10%
 };
-
-export default CONTRACTS;
