@@ -150,8 +150,11 @@ const LoanRequestCard = ({ request, requestId, onBack, userVotingPower, userAddr
             )}
 
             {isExecutable && (
-              <button className="flex-1 btn-primary">
-                Execute
+              <button
+                onClick={() => onExecute(requestId)}
+                className="flex-1 btn-primary"
+              >
+                Execute Loan
               </button>
             )}
           </div>
@@ -311,7 +314,7 @@ export default function Loans() {
   const [error, setError] = useState("");
   const [unifiedBalances, setUnifiedBalances] = useState(null);
 
-  const { writeContract, data: hash, error: writeError } = useWriteContract();
+  const { writeContract, data: hash, error: writeError, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
   // // 🔹 Load Unified Balances from Nexus
@@ -470,6 +473,27 @@ export default function Loans() {
     }
   };
 
+  const handleExecuteLoan = async (requestId) => {
+    console.log('=== EXECUTING LOAN ===');
+    console.log('Request ID:', requestId);
+    console.log('Contract:', CONTRACTS.sepolia.loanVoting);
+
+    try {
+      const result = writeContract({
+        address: CONTRACTS.sepolia.loanVoting,
+        abi: ABIS.loanVoting,
+        functionName: 'executeRequest',
+        args: [BigInt(requestId)],
+        gas: 800000n,
+      });
+      console.log('Transaction initiated:', result);
+    } catch (error) {
+      console.error('=== EXECUTION ERROR ===');
+      console.error('Error:', error);
+      console.error('Message:', error?.message);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -502,6 +526,42 @@ export default function Loans() {
       {/* Browse Tab */}
       {activeTab === "browse" && (
         <div>
+          {/* Transaction Status */}
+          {writeError && (
+            <div className="mb-4 p-4 bg-red-950/20 border border-red-900/30 rounded-lg">
+              <p className="text-sm text-red-300 font-medium mb-2">Transaction Error</p>
+              <p className="text-xs text-gray-400">{writeError.message}</p>
+            </div>
+          )}
+
+          {isPending && (
+            <div className="mb-4 p-4 bg-blue-950/20 border border-blue-900/30 rounded-lg">
+              <p className="text-sm text-blue-300">Waiting for wallet confirmation...</p>
+            </div>
+          )}
+
+          {isConfirming && hash && (
+            <div className="mb-4 p-4 bg-amber-950/20 border border-amber-900/30 rounded-lg">
+              <p className="text-sm text-amber-300">Transaction confirming...</p>
+              <p className="text-xs text-gray-400 mt-1 font-mono">
+                <a
+                  href={`https://sepolia.etherscan.io/tx/${hash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-blue-400"
+                >
+                  View on Etherscan ↗
+                </a>
+              </p>
+            </div>
+          )}
+
+          {isSuccess && (
+            <div className="mb-4 p-4 bg-emerald-950/20 border border-emerald-900/30 rounded-lg">
+              <p className="text-sm text-emerald-300">Transaction confirmed!</p>
+            </div>
+          )}
+
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-gray-100">
               Active Requests ({requestCount})
@@ -557,6 +617,7 @@ export default function Loans() {
                       approved,
                     }}
                     onBack={handleBackLoan}
+                    onExecute={handleExecuteLoan}
                     userVotingPower={votingPower}
                     userAddress={address}
                     isMember={isActiveMember}

@@ -29,6 +29,7 @@ contract LoanManager is Ownable, ReentrancyGuard {
     LendingPool public lendingPool;
     CreditScore public creditScore;
     IERC20 public stablecoin;
+    address public loanVoting;
 
     // Minimum credit score required to request a loan (0-1000 scale)
     uint256 public minCreditScore;
@@ -139,6 +140,16 @@ contract LoanManager is Ownable, ReentrancyGuard {
         baseInterestRate = _baseInterestRate;
     }
 
+    // Modifiers
+
+    /**
+     * @notice Restricts function access to only the LoanVoting contract
+     */
+    modifier onlyLoanVoting() {
+        require(msg.sender == loanVoting, "Caller is not LoanVoting contract");
+        _;
+    }
+
     // Core Functions
 
     /**
@@ -204,27 +215,43 @@ contract LoanManager is Ownable, ReentrancyGuard {
         uint256 remainingDebt = loan.totalOwed - loan.amountRepaid;
         require(amount <= remainingDebt, "Amount exceeds remaining debt");
 
-        // Calculate how much of this payment goes towards principal (proportional to principal/totalOwed ratio)
-        // If paying the entire remaining debt, pay exactly the remaining principal
+        // Calculate how much of this payment goes towards principal and interest
         uint256 principalPayment;
+        uint256 interestPayment;
+
         if (amount >= remainingDebt) {
-            // Final payment - calculate remaining principal to pay
+            // Final payment - calculate remaining principal and interest
             uint256 principalRepaid = (loan.amountRepaid * loan.principal) / loan.totalOwed;
             principalPayment = loan.principal - principalRepaid;
+            interestPayment = remainingDebt - principalPayment;
         } else {
-            // Partial payment - proportional to principal/total ratio
+            // Partial payment - split proportionally between principal and interest
             principalPayment = (amount * loan.principal) / loan.totalOwed;
+            interestPayment = amount - principalPayment;
         }
 
-        // Transfer principal from borrower to this contract
-        if (principalPayment > 0) {
-            stablecoin.safeTransferFrom(msg.sender, address(this), principalPayment);
+        // Transfer entire payment from borrower to this contract
+        stablecoin.safeTransferFrom(msg.sender, address(this), amount);
 
+        // Send principal to LendingPool
+        if (principalPayment > 0) {
             // Approve LendingPool to spend the principal
             stablecoin.forceApprove(address(lendingPool), principalPayment);
 
-            // Process principal repayment through LendingPool (only principal, not interest)
+            // Process principal repayment through LendingPool
             lendingPool.receiveRepayment(msg.sender, principalPayment);
+
+            // Reset approval to 0 for security
+            stablecoin.forceApprove(address(lendingPool), 0);
+        }
+
+        // Send interest to LendingPool
+        if (interestPayment > 0) {
+            // Approve LendingPool to spend the interest
+            stablecoin.forceApprove(address(lendingPool), interestPayment);
+
+            // Process interest payment through LendingPool
+            lendingPool.receiveInterest(msg.sender, interestPayment);
 
             // Reset approval to 0 for security
             stablecoin.forceApprove(address(lendingPool), 0);
@@ -241,6 +268,56 @@ contract LoanManager is Ownable, ReentrancyGuard {
             totalActiveLoans--;
             emit LoanFullyRepaid(msg.sender, loan.amountRepaid);
         }
+    }
+
+    /**
+     * @notice Approve and create a loan from LoanVoting contract
+     * @dev Only callable by LoanVoting contract after DAO approval
+     * @param borrower The approved borrower address
+     * @param amount The approved loan amount
+     */
+    function approveLoanFromVoting(address borrower, uint256 amount) external onlyLoanVoting {
+        require(amount > 0, "Loan amount must be > 0");
+        require(amount <= maxLoanAmount, "Amount exceeds maximum loan");
+        require(loans[borrower].status == LoanStatus.None ||
+                loans[borrower].status == LoanStatus.Repaid,
+                "Active loan already exists");
+
+        // Check borrower's credit score
+        uint256 borrowerScore = creditScore.getScore(borrower);
+        require(borrowerScore >= minCreditScore, "Credit score too low");
+
+        // Calculate interest rate based on credit score
+        uint256 interestRate = calculateInterestRate(borrowerScore);
+
+        // Calculate total amount owed (principal + interest)
+        uint256 interest = (amount * interestRate) / 10000;
+        uint256 totalOwed = amount + interest;
+
+        // Set loan deadline
+        uint256 deadline = block.timestamp + defaultLoanDuration;
+
+        // Create loan record
+        loans[borrower] = Loan({
+            principal: amount,
+            interestRate: interestRate,
+            totalOwed: totalOwed,
+            amountRepaid: 0,
+            startTime: block.timestamp,
+            deadline: deadline,
+            status: LoanStatus.Active
+        });
+
+        // Update statistics
+        totalActiveLoans++;
+        totalLoansDisbursed += amount;
+
+        emit LoanRequested(borrower, amount, interestRate, deadline);
+
+        // Disburse loan from LendingPool
+        lendingPool.disburseLoan(borrower, amount);
+
+        emit LoanDisbursed(borrower, amount, totalOwed, deadline);
     }
 
     /**
@@ -335,6 +412,16 @@ contract LoanManager is Ownable, ReentrancyGuard {
         require(_rate > 0 && _rate <= 10000, "Invalid rate");
         baseInterestRate = _rate;
         emit BaseInterestRateUpdated(_rate);
+    }
+
+    /**
+     * @notice Set the LoanVoting contract address
+     * @dev Only callable by contract owner. Must be called after deployment to authorize LoanVoting
+     * @param _loanVoting Address of the LoanVoting contract
+     */
+    function setLoanVoting(address _loanVoting) external onlyOwner {
+        require(_loanVoting != address(0), "Invalid LoanVoting address");
+        loanVoting = _loanVoting;
     }
 
     // View Functions
