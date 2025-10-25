@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useNexus } from '../contexts/NexusContext';
 import {
   LayoutDashboard,
   Coins,
@@ -9,9 +10,10 @@ import {
   Menu,
   X,
   TrendingUp,
+  Fuel,
 } from 'lucide-react';
 
-const Navigation = ({ mobile = false, onClose = () => {} }) => {
+const Navigation = ({ mobile = false, onClose = () => { } }) => {
   const location = useLocation();
 
   const navItems = [
@@ -19,6 +21,7 @@ const Navigation = ({ mobile = false, onClose = () => {} }) => {
     { path: '/loans', icon: Coins, label: 'Loans' },
     { path: '/members', icon: Users, label: 'Members' },
     { path: '/yield', icon: TrendingUp, label: 'Yield Pool' },
+    { path: '/gas', icon: Fuel, label: 'Gas Manager' },
     { path: '/account', icon: Wallet, label: 'Account' },
   ];
 
@@ -34,10 +37,9 @@ const Navigation = ({ mobile = false, onClose = () => {} }) => {
           className={`
             flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium
             transition-all duration-150 ease-out
-            ${
-              isActive(path)
-                ? 'bg-gray-900 text-gray-100'
-                : 'text-gray-400 hover:text-gray-100 hover:bg-gray-950'
+            ${isActive(path)
+              ? 'bg-gray-900 text-gray-100'
+              : 'text-gray-400 hover:text-gray-100 hover:bg-gray-950'
             }
           `}
         >
@@ -51,7 +53,7 @@ const Navigation = ({ mobile = false, onClose = () => {} }) => {
 
 export default function Layout({ children }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+  const { nexus } = useNexus();
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
@@ -89,6 +91,16 @@ export default function Layout({ children }) {
                   largeScreen: true,
                 }}
               />
+              {/* Nexus Status */}
+              {nexus ? (
+                <span className="text-green-400 text-sm font-mono">
+                  Nexus Connected
+                </span>
+              ) : (
+                <span className="text-gray-500 text-sm font-mono">
+                  Nexus Not Connected
+                </span>
+              )}
 
               {/* Mobile Menu Button */}
               <button
