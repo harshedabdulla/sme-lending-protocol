@@ -1,0 +1,22 @@
+Nothing to compile
+Nothing to compile
+
+An unexpected error occurred:
+
+Error [ERR_REQUIRE_ASYNC_MODULE]: require() cannot be used on an ESM graph with top-level await. Use import() instead. To see where the top-level await comes from, use --experimental-print-required-tla.
+  From /Users/bigrowtecconsulting/Documents/sme-lending-protocol/packages/contracts/scripts/deployAll2.cjs 
+  Requiring /Users/bigrowtecconsulting/Documents/sme-lending-protocol/node_modules/hardhat/dist/src/index.js 
+    at ModuleJobSync.runSync (node:internal/modules/esm/module_job:432:13)
+    at ModuleLoader.importSyncForRequire (node:internal/modules/esm/loader:427:47)
+    at loadESMFromCJS (node:internal/modules/cjs/loader:1561:24)
+    at Module._compile (node:internal/modules/cjs/loader:1712:5)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12) {
+  code: 'ERR_REQUIRE_ASYNC_MODULE'
+}
+
+If you think this is a bug in Hardhat, please report it here: https://hardhat.org/report-bug

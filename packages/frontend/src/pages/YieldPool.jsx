@@ -3,7 +3,7 @@ import { useAccount, useReadContracts, useWriteContract, useWaitForTransactionRe
 import { parseUnits, formatUnits } from 'viem';
 import { useNexus } from '../contexts/NexusContext';
 import { getUnifiedBalances } from '../lib/nexus';
-import { CONTRACT_ADDRESSES, ABIS } from '../config/contracts';
+import { CONTRACTS, ABIS } from '../config/contracts';
 import { TrendingUp, DollarSign, Clock, ArrowDownCircle, ArrowUpCircle, Shield, AlertCircle, Globe, Zap, Layers } from 'lucide-react';
 
 export default function YieldPool() {
@@ -46,45 +46,45 @@ export default function YieldPool() {
   const { data } = useReadContracts({
     contracts: [
       {
-        address: CONTRACT_ADDRESSES.yieldingPool,
+        address: CONTRACTS.sepolia.yieldingPool,
         abi: ABIS.yieldingPool,
         functionName: 'getTotalValueLocked',
       },
       {
-        address: CONTRACT_ADDRESSES.yieldingPool,
+        address: CONTRACTS.sepolia.yieldingPool,
         abi: ABIS.yieldingPool,
         functionName: 'shares',
         args: address ? [address] : undefined,
       },
       {
-        address: CONTRACT_ADDRESSES.yieldingPool,
+        address: CONTRACTS.sepolia.yieldingPool,
         abi: ABIS.yieldingPool,
         functionName: 'balanceOf',
         args: address ? [address] : undefined,
       },
       {
-        address: CONTRACT_ADDRESSES.yieldingPool,
+        address: CONTRACTS.sepolia.yieldingPool,
         abi: ABIS.yieldingPool,
         functionName: 'withdrawalRequests',
         args: address ? [address] : undefined,
       },
       {
-        address: CONTRACT_ADDRESSES.yieldingPool,
+        address: CONTRACTS.sepolia.yieldingPool,
         abi: ABIS.yieldingPool,
         functionName: 'canWithdraw',
         args: address ? [address] : undefined,
       },
       {
-        address: CONTRACT_ADDRESSES.mockUSDT,
+        address: CONTRACTS.sepolia.mockUSDT,
         abi: ABIS.mockUSDT,
         functionName: 'balanceOf',
         args: address ? [address] : undefined,
       },
       {
-        address: CONTRACT_ADDRESSES.mockUSDT,
+        address: CONTRACTS.sepolia.mockUSDT,
         abi: ABIS.mockUSDT,
         functionName: 'allowance',
-        args: address ? [address, CONTRACT_ADDRESSES.yieldingPool] : undefined,
+        args: address ? [address, CONTRACTS.sepolia.yieldingPool] : undefined,
       },
     ],
     watch: true,
@@ -106,10 +106,10 @@ export default function YieldPool() {
   const handleApprove = async () => {
     try {
       await writeContract({
-        address: CONTRACT_ADDRESSES.mockUSDT,
+        address: CONTRACTS.sepolia.mockUSDT,
         abi: ABIS.mockUSDT,
         functionName: 'approve',
-        args: [CONTRACT_ADDRESSES.yieldingPool, parseUnits('1000000', 6)],
+        args: [CONTRACTS.sepolia.yieldingPool, parseUnits('1000000', 6)],
         gas: 100000n,
       });
     } catch (error) {
@@ -122,7 +122,7 @@ export default function YieldPool() {
 
     try {
       await writeContract({
-        address: CONTRACT_ADDRESSES.yieldingPool,
+        address: CONTRACTS.sepolia.yieldingPool,
         abi: ABIS.yieldingPool,
         functionName: 'deposit',
         args: [parseUnits(depositAmount, 6)],
@@ -139,7 +139,7 @@ export default function YieldPool() {
 
     try {
       await writeContract({
-        address: CONTRACT_ADDRESSES.yieldingPool,
+        address: CONTRACTS.sepolia.yieldingPool,
         abi: ABIS.yieldingPool,
         functionName: 'requestWithdrawal',
         args: [parseUnits(withdrawShares, 6)],
@@ -154,7 +154,7 @@ export default function YieldPool() {
   const handleWithdraw = async () => {
     try {
       await writeContract({
-        address: CONTRACT_ADDRESSES.yieldingPool,
+        address: CONTRACTS.sepolia.yieldingPool,
         abi: ABIS.yieldingPool,
         functionName: 'withdraw',
         gas: 300000n,

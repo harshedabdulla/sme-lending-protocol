@@ -8,21 +8,21 @@ export const CHAIN_ID = {
   SEPOLIA: Number(import.meta.env.VITE_CHAIN_ID) || 11155111,
 };
 
-// Contract addresses and ABIs
-export const CONTRACT_ADDRESSES = {
-  // Base Protocol Contracts
-  mockUSDT: import.meta.env.VITE_MOCK_USDT_ADDRESS,
-  creditScore: import.meta.env.VITE_CREDIT_SCORE_ADDRESS,
-  lendingPool: import.meta.env.VITE_LENDING_POOL_ADDRESS,
-  loanManager: import.meta.env.VITE_LOAN_MANAGER_ADDRESS,
-
-  // DAO Governance Contracts
-  governanceToken: import.meta.env.VITE_GOVERNANCE_TOKEN_ADDRESS,
-  reputationNFT: import.meta.env.VITE_REPUTATION_NFT_ADDRESS,
-  daoMembership: import.meta.env.VITE_DAO_MEMBERSHIP_ADDRESS,
-  yieldingPool: import.meta.env.VITE_YIELDING_POOL_ADDRESS,
-  insurancePool: import.meta.env.VITE_INSURANCE_POOL_ADDRESS,
-  loanVoting: import.meta.env.VITE_LOAN_VOTING_ADDRESS,
+export const CONTRACTS = {
+  sepolia: {
+    // Base Protocol Contracts
+    mockUSDT: import.meta.env.VITE_PYUSD_ADDRESS,
+    creditScore: import.meta.env.VITE_CREDIT_SCORE_ADDRESS,
+    lendingPool: import.meta.env.VITE_LENDING_POOL_ADDRESS,
+    loanManager: import.meta.env.VITE_LOAN_MANAGER_ADDRESS,
+    // DAO Governance Contracts
+    governanceToken: import.meta.env.VITE_GOVERNANCE_TOKEN_ADDRESS,
+    reputationNFT: import.meta.env.VITE_REPUTATION_NFT_ADDRESS,
+    daoMembership: import.meta.env.VITE_DAO_MEMBERSHIP_ADDRESS,
+    yieldingPool: import.meta.env.VITE_YIELDING_POOL_ADDRESS,
+    insurancePool: import.meta.env.VITE_INSURANCE_POOL_ADDRESS,
+    loanVoting: import.meta.env.VITE_LOAN_VOTING_ADDRESS,
+  }
 };
 
 // ABIs (only the functions we need for the frontend)

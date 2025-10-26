@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useNexus } from '../contexts/NexusContext';
 import {
@@ -12,12 +12,13 @@ import {
   TrendingUp,
   Fuel,
 } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 const Navigation = ({ mobile = false, onClose = () => { } }) => {
   const location = useLocation();
 
   const navItems = [
-    { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/loans', icon: Coins, label: 'Loans' },
     { path: '/members', icon: Users, label: 'Members' },
     { path: '/yield', icon: TrendingUp, label: 'Yield Pool' },
@@ -35,11 +36,12 @@ const Navigation = ({ mobile = false, onClose = () => { } }) => {
           to={path}
           onClick={onClose}
           className={`
-            flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium
+            flex items-center space-x-2 px-3 py-2  text-sm font-medium
             transition-all duration-150 ease-out
-            ${isActive(path)
-              ? 'bg-gray-900 text-gray-100'
-              : 'text-gray-400 hover:text-gray-100 hover:bg-gray-950'
+            ${
+              isActive(path)
+                ? 'bg-blue-600 text-white dark:bg-gray-900 dark:text-gray-100'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-950'
             }
           `}
         >
@@ -51,25 +53,19 @@ const Navigation = ({ mobile = false, onClose = () => { } }) => {
   );
 };
 
-export default function Layout({ children }) {
+export default function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { nexus } = useNexus();
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white dark:bg-black">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-black/80 border-b border-gray-900">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-black/80 border-b border-gray-200 dark:border-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center">
-                <span className="text-sm font-bold text-white">P</span>
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="text-base font-semibold text-gray-100">
-                  Prism Finance
-                </h1>
-                <p className="text-xs text-gray-500">Social Collateral Protocol</p>
+              <div className="w-8 h-8  bg-gradient-to-br from-blue-600 to-blue-500 flex items-center justify-center">
+                <span className="text-sm font-bold text-white">pf.</span>
               </div>
             </Link>
 
@@ -80,6 +76,7 @@ export default function Layout({ children }) {
 
             {/* Actions */}
             <div className="flex items-center space-x-3">
+              <ThemeToggle />
               <ConnectButton
                 accountStatus={{
                   smallScreen: 'avatar',
@@ -105,7 +102,7 @@ export default function Layout({ children }) {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg text-gray-400 hover:text-gray-100 hover:bg-gray-900 transition-colors"
+                className="md:hidden p-2  text-gray-400 hover:text-gray-100 hover:bg-gray-900 transition-colors"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -126,7 +123,7 @@ export default function Layout({ children }) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="slide-up">
-          {children}
+          <Outlet />
         </div>
       </main>
 

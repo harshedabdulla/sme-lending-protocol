@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useAccount, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseUnits, formatUnits } from 'viem';
-import { CONTRACT_ADDRESSES, ABIS, LOAN_CONFIG, CHAIN_CONFIG } from '../config/contracts';
+import { CONTRACTS, ABIS, LOAN_CONFIG, CHAIN_CONFIG } from '../config/contracts';
 import { Coins, Users, Clock, Globe, Zap, ArrowRight } from 'lucide-react';
 import { createCrossChainIntent, getUnifiedBalances } from '../lib/nexus';
 import { useNexus } from '../contexts/NexusContext';
 
-// Helper to support both nested and flat contract address objects
+// Helper to get contract address from sepolia network
 const getContractAddress = (key) => {
-  return CONTRACT_ADDRESSES?.sepolia?.[key] || CONTRACT_ADDRESSES?.[key];
+  return CONTRACTS.sepolia[key];
 };
 
 

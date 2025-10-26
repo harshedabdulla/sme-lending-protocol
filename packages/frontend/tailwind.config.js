@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,11 +8,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Minimal Black & Purple Theme
+        // Hyperliquid Black & Blue Theme
         primary: {
-          DEFAULT: '#9333ea', // purple-600
-          light: '#a855f7',   // purple-500
-          dark: '#7e22ce',    // purple-700
+          DEFAULT: '#3B82F6', // Electric blue
+          light: '#60A5FA',   // Light blue
+          dark: '#2563EB',    // Deep blue
+        },
+        accent: {
+          DEFAULT: '#60A5FA', // Light blue accent
+          light: '#93C5FD',   // Very light blue
+          dark: '#3B82F6',    // Electric blue
         },
         dark: {
           bg: '#000000',      // Pure black
@@ -22,7 +28,7 @@ export default {
         }
       },
       backgroundImage: {
-        'grid-pattern': "linear-gradient(rgba(147, 51, 234, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(147, 51, 234, 0.05) 1px, transparent 1px)",
+        'grid-pattern': "linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px)",
       },
       backgroundSize: {
         'grid': '40px 40px',
@@ -75,8 +81,9 @@ export default {
         'purple': '0 4px 14px 0 rgba(147, 51, 234, 0.39)',
       },
       fontFamily: {
-        'mono': ['JetBrains Mono', 'Consolas', 'Monaco', 'monospace'],
-        'display': ['Orbitron', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Space Grotesk', 'Inter', 'sans-serif'],
+        mono: ['JetBrains Mono', 'IBM Plex Mono', 'Roboto Mono', 'monospace'],
       },
     },
   },

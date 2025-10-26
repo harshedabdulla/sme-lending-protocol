@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAccount, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { CONTRACT_ADDRESSES, ABIS, DAO_CONFIG } from '../config/contracts';
+import { CONTRACTS, ABIS, DAO_CONFIG } from '../config/contracts';
 import { Users, UserPlus, Vote, CheckCircle, XCircle, Clock, Globe, Zap, Shield } from 'lucide-react';
 import { useNexus } from '../contexts/NexusContext';
 
@@ -225,9 +225,9 @@ export default function Members() {
   // Read contract data (Active members, proposals, NFTs)
   const { data } = useReadContracts({
     contracts: [
-      { address: CONTRACT_ADDRESSES.daoMembership, abi: ABIS.daoMembership, functionName: 'getActiveMemberCount' },
-      { address: CONTRACT_ADDRESSES.daoMembership, abi: ABIS.daoMembership, functionName: 'proposalCount' },
-      { address: CONTRACT_ADDRESSES.reputationNFT, abi: ABIS.reputationNFT, functionName: 'totalSupply' },
+      { address: CONTRACTS.sepolia.daoMembership, abi: ABIS.daoMembership, functionName: 'getActiveMemberCount' },
+      { address: CONTRACTS.sepolia.daoMembership, abi: ABIS.daoMembership, functionName: 'proposalCount' },
+      { address: CONTRACTS.sepolia.reputationNFT, abi: ABIS.reputationNFT, functionName: 'totalSupply' },
     ],
     watch: true,
   });
@@ -238,7 +238,7 @@ export default function Members() {
 
   // Read individual proposals
   const proposalContracts = Array.from({ length: proposalCount }, (_, i) => ({
-    address: CONTRACT_ADDRESSES.daoMembership,
+    address: CONTRACTS.sepolia.daoMembership,
     abi: ABIS.daoMembership,
     functionName: 'getProposal',
     args: [BigInt(i)],
@@ -268,7 +268,7 @@ export default function Members() {
 
       // Create proposal on-chain
       await writeContract({
-        address: CONTRACT_ADDRESSES.daoMembership,
+        address: CONTRACTS.sepolia.daoMembership,
         abi: ABIS.daoMembership,
         functionName: 'proposeMembership',
         args: [candidateAddress, reason],
@@ -302,7 +302,7 @@ export default function Members() {
 
       // Vote on-chain
       await writeContract({
-        address: CONTRACT_ADDRESSES.daoMembership,
+        address: CONTRACTS.sepolia.daoMembership,
         abi: ABIS.daoMembership,
         functionName: 'vote',
         args: [BigInt(proposalId), support],
@@ -316,7 +316,7 @@ export default function Members() {
   const handleExecute = async (proposalId) => {
     try {
       await writeContract({
-        address: CONTRACT_ADDRESSES.daoMembership,
+        address: CONTRACTS.sepolia.daoMembership,
         abi: ABIS.daoMembership,
         functionName: 'executeProposal',
         args: [BigInt(proposalId)],

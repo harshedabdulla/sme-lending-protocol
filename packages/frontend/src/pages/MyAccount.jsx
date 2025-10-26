@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAccount, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { formatUnits, parseUnits } from 'viem';
-import { CONTRACT_ADDRESSES, ABIS } from '../config/contracts';
+import { CONTRACTS, ABIS } from '../config/contracts';
 import { useNexus } from '../contexts/NexusContext';
 import {
   User,
@@ -150,19 +150,19 @@ export default function MyAccount() {
   const { data, isLoading } = useReadContracts({
     contracts: [
       {
-        address: CONTRACT_ADDRESSES.governanceToken,
+        address: CONTRACTS.sepolia.governanceToken,
         abi: ABIS.governanceToken,
         functionName: 'balanceOf',
         args: address ? [address] : undefined,
       },
       {
-        address: CONTRACT_ADDRESSES.governanceToken,
+        address: CONTRACTS.sepolia.governanceToken,
         abi: ABIS.governanceToken,
         functionName: 'getStakeInfo',
         args: address ? [address] : undefined,
       },
       {
-        address: CONTRACT_ADDRESSES.governanceToken,
+        address: CONTRACTS.sepolia.governanceToken,
         abi: ABIS.governanceToken,
         functionName: 'getVotingPower',
         args: address ? [address] : undefined,
