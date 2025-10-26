@@ -2,6 +2,8 @@ import { useAccount, useReadContracts } from 'wagmi';
 import { formatUnits } from 'viem';
 import { Link } from 'react-router-dom';
 import { CONTRACTS, ABIS } from '../config/contracts';
+import { useNexus } from '../contexts/NexusContext';
+import { getUnifiedBalances } from '../lib/nexus';
 import {
   TrendingUp,
   Users,
@@ -9,7 +11,9 @@ import {
   Shield,
   DollarSign,
   ArrowRight,
+  Globe,
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const StatCard = ({ label, value, icon: Icon, loading }) => (
   <div className="stat-card hover:border-gray-300 dark:hover:border-gray-800 group">
@@ -46,6 +50,14 @@ const InfoCard = ({ title, items }) => (
 
 export default function Dashboard() {
   const { address, isConnected } = useAccount();
+
+  const { nexus } = useNexus();
+  const [unifiedBalances, setUnifiedBalances] = useState(null);
+  const [crossChainStats, setCrossChainStats] = useState({
+    totalChains: 3,
+    activeIntents: 0,
+    crossChainVolume: 0,
+  });
 
   const { data, isLoading } = useReadContracts({
     contracts: [
@@ -89,6 +101,34 @@ export default function Dashboard() {
     watch: true,
   });
 
+  useEffect(() => {
+    if (nexus && address) {
+      loadUnifiedBalances();
+    }
+  }, [nexus, address]);
+
+  const loadUnifiedBalances = async () => {
+    try {
+      const balances = await getUnifiedBalances();
+      setUnifiedBalances(balances);
+
+      // Update cross-chain stats based on unified balances
+      if (balances) {
+        const totalVolume = Object.values(balances.balances || {}).reduce((sum, chain) => {
+          return sum + (chain.USDT || 0);
+        }, 0);
+
+        setCrossChainStats(prev => ({
+          ...prev,
+          crossChainVolume: totalVolume,
+          activeIntents: Object.keys(balances.balances || {}).length,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to load unified balances:", error);
+    }
+  };
+
   const tvl = data?.[0]?.result ? formatUnits(data[0].result, 6) : '0';
   const memberCount = data?.[1]?.result ? data[1].result.toString() : '0';
   const activeLoans = data?.[2]?.result ? data[2].result.toString() : '0';
@@ -109,7 +149,6 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {/* Onboarding Banners */}
       {!isConnected && (
         <div className="card-bordered border-blue-900/20 bg-blue-950/10">
           <div className="flex items-start space-x-3">
@@ -163,7 +202,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total Value Locked"
@@ -191,7 +229,78 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Pool Status */}
+      {/* Cross-Chain Stats Section (ONLY if Nexus is available) */}
+      {nexus && (
+        <div className="card">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
+              <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <span>Cross-Chain Activity</span>
+            </h2>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400 animate-pulse" />
+              <span className="text-sm text-gray-600 dark:text-gray-500">Nexus Connected</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-gray-600 dark:text-gray-500 uppercase tracking-wide">
+                Supported Chains
+              </div>
+              <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100 tabular-nums">
+                {crossChainStats.totalChains}
+              </div>
+              {/* todo:makechains dynamic */}
+              <div className="text-xs text-gray-600 dark:text-gray-500 mt-1">
+                Ethereum, Polygon, Arbitrum, Base, Optimism, Avalanche, Sepolia
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-gray-600 dark:text-gray-500 uppercase tracking-wide">
+                Active Intents
+              </div>
+              <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100 tabular-nums">
+                {crossChainStats.activeIntents}
+              </div>
+              <div className="text-xs text-gray-600 dark:text-gray-500 mt-1">
+                Pending cross-chain transactions
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-xs font-medium text-gray-600 dark:text-gray-500 uppercase tracking-wide">
+                Cross-Chain Volume
+              </div>
+              <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100 tabular-nums">
+                ${crossChainStats.crossChainVolume.toLocaleString()}
+              </div>
+              <div className="text-xs text-gray-600 dark:text-gray-500 mt-1">
+                Total bridged value
+              </div>
+            </div>
+          </div>
+
+          {unifiedBalances && (
+            <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-800">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Unified Balances</h3>
+              <div className="space-y-2">
+                {Object.entries(unifiedBalances.balances || {}).map(([chain, balance]) => (
+                  <div key={chain} className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600 dark:text-gray-400 capitalize">{chain}</span>
+                    <span className="text-gray-900 dark:text-gray-100 font-mono">
+                      {balance.USDT ? `$${balance.USDT.toLocaleString()}` : 'N/A'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* KEPT: Original Pool Status */}
       <div className="card">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Protocol Status</h2>
@@ -248,7 +357,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Info Grid */}
+      {/* ✅ KEPT: Original Info Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <InfoCard
           title="How It Works"

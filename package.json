@@ -11,7 +11,7 @@
     "contracts:deploy": "yarn workspace @sme-lending/contracts deploy",
     "backend:dev": "yarn workspace @sme-lending/backend dev",
     "backend:build": "yarn workspace @sme-lending/backend build",
-    "frontend:dev": "yarn workspace @sme-lending/frontend dev",
+    "frontend:dev": "yarn workspace @prism-finance/frontend dev",
     "frontend:build": "yarn workspace @sme-lending/frontend build",
     "dev": "concurrently \"yarn backend:dev\" \"yarn frontend:dev\"",
     "install:all": "yarn install"
