@@ -233,63 +233,63 @@ export default function Dashboard() {
       {nexus && (
         <div className="card">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-100 flex items-center space-x-2">
-              <Globe className="w-5 h-5 text-blue-400" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
+              <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <span>Cross-Chain Activity</span>
             </h2>
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-              <span className="text-sm text-gray-500">Nexus Connected</span>
+              <div className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400 animate-pulse" />
+              <span className="text-sm text-gray-600 dark:text-gray-500">Nexus Connected</span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
-              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <div className="text-xs font-medium text-gray-600 dark:text-gray-500 uppercase tracking-wide">
                 Supported Chains
               </div>
-              <div className="text-2xl font-semibold text-gray-100 tabular-nums">
+              <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100 tabular-nums">
                 {crossChainStats.totalChains}
               </div>
               {/* todo:makechains dynamic */}
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-xs text-gray-600 dark:text-gray-500 mt-1">
                 Ethereum, Polygon, Arbitrum, Base, Optimism, Avalanche, Sepolia
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <div className="text-xs font-medium text-gray-600 dark:text-gray-500 uppercase tracking-wide">
                 Active Intents
               </div>
-              <div className="text-2xl font-semibold text-gray-100 tabular-nums">
+              <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100 tabular-nums">
                 {crossChainStats.activeIntents}
               </div>
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-xs text-gray-600 dark:text-gray-500 mt-1">
                 Pending cross-chain transactions
               </div>
             </div>
 
             <div className="space-y-2">
-              <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              <div className="text-xs font-medium text-gray-600 dark:text-gray-500 uppercase tracking-wide">
                 Cross-Chain Volume
               </div>
-              <div className="text-2xl font-semibold text-gray-100 tabular-nums">
+              <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100 tabular-nums">
                 ${crossChainStats.crossChainVolume.toLocaleString()}
               </div>
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-xs text-gray-600 dark:text-gray-500 mt-1">
                 Total bridged value
               </div>
             </div>
           </div>
 
           {unifiedBalances && (
-            <div className="mt-6 p-4 bg-gray-900/50 rounded-lg border border-gray-800">
-              <h3 className="text-sm font-medium text-gray-300 mb-3">Unified Balances</h3>
+            <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-800">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Unified Balances</h3>
               <div className="space-y-2">
                 {Object.entries(unifiedBalances.balances || {}).map(([chain, balance]) => (
                   <div key={chain} className="flex justify-between items-center text-sm">
-                    <span className="text-gray-400 capitalize">{chain}</span>
-                    <span className="text-gray-100 font-mono">
+                    <span className="text-gray-600 dark:text-gray-400 capitalize">{chain}</span>
+                    <span className="text-gray-900 dark:text-gray-100 font-mono">
                       {balance.USDT ? `$${balance.USDT.toLocaleString()}` : 'N/A'}
                     </span>
                   </div>

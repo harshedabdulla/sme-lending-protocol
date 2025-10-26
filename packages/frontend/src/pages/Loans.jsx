@@ -70,8 +70,8 @@ const LoanRequestCard = ({ request, requestId, onBack, userVotingPower, userAddr
     <div className="card-hover">
       <div className="flex items-start justify-between mb-4">
         <div className="space-y-1">
-          <div className="text-xs text-gray-500 font-mono">Request #{requestId}</div>
-          <div className="text-xs text-gray-600 font-mono">
+          <div className="text-xs text-gray-600 dark:text-gray-500 font-mono">Request #{requestId}</div>
+          <div className="text-xs text-gray-700 dark:text-gray-600 font-mono">
             {request.borrower.slice(0, 6)}...{request.borrower.slice(-4)}
           </div>
         </div>
@@ -89,42 +89,42 @@ const LoanRequestCard = ({ request, requestId, onBack, userVotingPower, userAddr
       </div>
 
       <div className="mb-4">
-        <div className="text-2xl font-semibold text-gray-100 tabular-nums">
+        <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100 tabular-nums">
           ${formatUnits(request.amount, 6)}
         </div>
-        <div className="text-xs text-gray-500">USDT</div>
+        <div className="text-xs text-gray-600 dark:text-gray-500">USDT</div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="space-y-1">
           <div className="flex items-center space-x-1.5">
-            <Users className="w-3.5 h-3.5 text-gray-500" />
-            <span className="text-xs text-gray-500 uppercase tracking-wide">Backers</span>
+            <Users className="w-3.5 h-3.5 text-gray-600 dark:text-gray-500" />
+            <span className="text-xs text-gray-600 dark:text-gray-500 uppercase tracking-wide">Backers</span>
           </div>
-          <div className="text-lg font-semibold text-gray-100 tabular-nums">
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-100 tabular-nums">
             {request.backerCount.toString()}
           </div>
         </div>
 
         <div className="space-y-1">
           <div className="flex items-center space-x-1.5">
-            <Coins className="w-3.5 h-3.5 text-gray-500" />
-            <span className="text-xs text-gray-500 uppercase tracking-wide">Collateral</span>
+            <Coins className="w-3.5 h-3.5 text-gray-600 dark:text-gray-500" />
+            <span className="text-xs text-gray-600 dark:text-gray-500 uppercase tracking-wide">Collateral</span>
           </div>
-          <div className="text-lg font-semibold text-gray-100 tabular-nums">
+          <div className="text-lg font-semibold text-gray-900 dark:text-gray-100 tabular-nums">
             {requiredCollateral}%
           </div>
         </div>
       </div>
 
       {!request.executed && (
-        <div className="flex items-center space-x-2 text-xs text-gray-500 mb-4">
+        <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-500 mb-4">
           <Clock className="w-3.5 h-3.5" />
           <span>Ends in {timeLeftDisplay}</span>
         </div>
       )}
       {!request.executed && (
-        <div className="flex items-center space-x-2 text-xs text-gray-500 mb-4">
+        <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-500 mb-4">
           <Clock className="w-3.5 h-3.5" />
           <span>Ends in {daysLeft} days</span>
         </div>
@@ -133,7 +133,7 @@ const LoanRequestCard = ({ request, requestId, onBack, userVotingPower, userAddr
       {!request.executed && (
         <div className="space-y-2">
           {backingBlockedReason && (
-            <div className="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded p-2">
+            <div className="text-xs text-amber-700 dark:text-amber-400 bg-amber-100/50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded p-2">
               ⚠️ {backingBlockedReason}
             </div>
           )}
@@ -221,13 +221,13 @@ const CrossChainLoanRequest = ({ onRequestLoan, nexus }) => {
   return (
     <div className="card-bordered">
       <div className="flex items-center space-x-2 mb-4">
-        <Globe className="w-5 h-5 text-blue-400" />
-        <h3 className="text-lg font-semibold text-gray-100">Cross-Chain Loan Request</h3>
+        <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Cross-Chain Loan Request</h3>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
             Loan Amount (USDT)
           </label>
           <input
@@ -240,7 +240,7 @@ const CrossChainLoanRequest = ({ onRequestLoan, nexus }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
             Target Chain
           </label>
           <select
@@ -257,7 +257,7 @@ const CrossChainLoanRequest = ({ onRequestLoan, nexus }) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
             Initial Collateral (%)
           </label>
           <input
@@ -289,12 +289,12 @@ const CrossChainLoanRequest = ({ onRequestLoan, nexus }) => {
         </button>
 
         {nexus && (
-          <div className="p-3 bg-blue-950/20 border border-blue-900/30 rounded-lg">
-            <div className="flex items-center space-x-2 text-sm text-blue-400">
+          <div className="p-3 bg-blue-100/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/30 rounded-lg">
+            <div className="flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400">
               <Globe className="w-4 h-4" />
               <span>Nexus SDK Connected</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-600 dark:text-gray-500 mt-1">
               Your loan will be processed across multiple chains for optimal liquidity
             </p>
           </div>
@@ -498,21 +498,21 @@ export default function Loans() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold text-gray-100">Loans</h1>
-        <p className="text-sm text-gray-500">
+        <h1 className="text-3xl font-semibold text-gray-900 dark:text-gray-100">Loans</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-500">
           Request loans with dynamic collateral or back other members
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 border-b border-gray-900">
+      <div className="flex space-x-1 border-b border-gray-200 dark:border-gray-900">
         {["browse", "request", "crossChain", "myLoans"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
-              ? "border-blue-500 text-gray-100"
-              : "border-transparent text-gray-500 hover:text-gray-300"
+              ? "border-blue-500 text-gray-900 dark:text-gray-100"
+              : "border-transparent text-gray-600 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300"
               }`}
           >
             {tab === "browse" && "Browse"}
@@ -528,27 +528,27 @@ export default function Loans() {
         <div>
           {/* Transaction Status */}
           {writeError && (
-            <div className="mb-4 p-4 bg-red-950/20 border border-red-900/30 rounded-lg">
-              <p className="text-sm text-red-300 font-medium mb-2">Transaction Error</p>
-              <p className="text-xs text-gray-400">{writeError.message}</p>
+            <div className="mb-4 p-4 bg-red-100/50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-lg">
+              <p className="text-sm text-red-700 dark:text-red-300 font-medium mb-2">Transaction Error</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">{writeError.message}</p>
             </div>
           )}
 
           {isPending && (
-            <div className="mb-4 p-4 bg-blue-950/20 border border-blue-900/30 rounded-lg">
-              <p className="text-sm text-blue-300">Waiting for wallet confirmation...</p>
+            <div className="mb-4 p-4 bg-blue-100/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/30 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">Waiting for wallet confirmation...</p>
             </div>
           )}
 
           {isConfirming && hash && (
-            <div className="mb-4 p-4 bg-amber-950/20 border border-amber-900/30 rounded-lg">
-              <p className="text-sm text-amber-300">Transaction confirming...</p>
-              <p className="text-xs text-gray-400 mt-1 font-mono">
+            <div className="mb-4 p-4 bg-amber-100/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-lg">
+              <p className="text-sm text-amber-700 dark:text-amber-300">Transaction confirming...</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-mono">
                 <a
                   href={`https://sepolia.etherscan.io/tx/${hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-blue-400"
+                  className="hover:text-blue-600 dark:hover:text-blue-400"
                 >
                   View on Etherscan ↗
                 </a>
@@ -557,17 +557,17 @@ export default function Loans() {
           )}
 
           {isSuccess && (
-            <div className="mb-4 p-4 bg-emerald-950/20 border border-emerald-900/30 rounded-lg">
-              <p className="text-sm text-emerald-300">Transaction confirmed!</p>
+            <div className="mb-4 p-4 bg-emerald-100/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/30 rounded-lg">
+              <p className="text-sm text-emerald-700 dark:text-emerald-300">Transaction confirmed!</p>
             </div>
           )}
 
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Active Requests ({requestCount})
             </h2>
             {nexus && (
-              <div className="flex items-center space-x-2 text-sm text-blue-400">
+              <div className="flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400">
                 <Globe className="w-4 h-4" />
                 <span>Cross-Chain Enabled</span>
               </div>
@@ -576,16 +576,16 @@ export default function Loans() {
 
           {!isConnected ? (
             <div className="card text-center py-12">
-              <Coins className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-              <p className="text-sm text-gray-400">
+              <Coins className="w-12 h-12 text-gray-600 dark:text-gray-700 mx-auto mb-4" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Connect your wallet to view and back loan requests
               </p>
             </div>
           ) : requestCount === 0 ? (
             <div className="card text-center py-12">
-              <Coins className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-              <p className="text-sm text-gray-400 mb-2">No active loan requests</p>
-              <p className="text-xs text-gray-600">Be the first to request a loan</p>
+              <Coins className="w-12 h-12 text-gray-600 dark:text-gray-700 mx-auto mb-4" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">No active loan requests</p>
+              <p className="text-xs text-gray-600 dark:text-gray-500">Be the first to request a loan</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -634,13 +634,13 @@ export default function Loans() {
       {activeTab === "crossChain" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-100 flex items-center space-x-2">
-              <Globe className="w-5 h-5 text-blue-400" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
+              <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <span>Cross-Chain Lending</span>
             </h2>
             {nexus && (
-              <div className="flex items-center space-x-2 text-sm text-emerald-400">
-                <div className="w-2 h-2 rounded-full bg-emerald-400" />
+              <div className="flex items-center space-x-2 text-sm text-emerald-600 dark:text-emerald-400">
+                <div className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
                 <span>Nexus Connected</span>
               </div>
             )}
@@ -648,9 +648,9 @@ export default function Loans() {
 
           {!nexus ? (
             <div className="card text-center py-12">
-              <Globe className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-              <p className="text-sm text-gray-400 mb-2">Nexus SDK Not Connected</p>
-              <p className="text-xs text-gray-600">
+              <Globe className="w-12 h-12 text-gray-600 dark:text-gray-700 mx-auto mb-4" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Nexus SDK Not Connected</p>
+              <p className="text-xs text-gray-600 dark:text-gray-500">
                 Connect your wallet to enable cross-chain lending
               </p>
             </div>
@@ -660,7 +660,7 @@ export default function Loans() {
 
               {unifiedBalances && (
                 <div className="card">
-                  <h3 className="text-lg font-semibold text-gray-100 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
                     Unified Balances
                   </h3>
                   <div className="space-y-3">
@@ -668,33 +668,33 @@ export default function Loans() {
                       ([chain, balance]) => (
                         <div
                           key={chain}
-                          className="flex justify-between items-center p-3 bg-gray-900/50 rounded-lg"
+                          className="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-900/50 rounded-lg"
                         >
                           <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 rounded-full bg-blue-400" />
-                            <span className="text-sm text-gray-300 capitalize">
+                            <div className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400" />
+                            <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">
                               {chain}
                             </span>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-medium text-gray-100">
+                            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                               {balance.USDT
                                 ? `$${balance.USDT.toLocaleString()}`
                                 : "N/A"}
                             </div>
-                            <div className="text-xs text-gray-500">USDT</div>
+                            <div className="text-xs text-gray-600 dark:text-gray-500">USDT</div>
                           </div>
                         </div>
                       )
                     )}
                   </div>
 
-                  <div className="mt-4 p-3 bg-blue-950/20 border border-blue-900/30 rounded-lg">
-                    <div className="flex items-center space-x-2 text-sm text-blue-400">
+                  <div className="mt-4 p-3 bg-blue-100/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/30 rounded-lg">
+                    <div className="flex items-center space-x-2 text-sm text-blue-600 dark:text-blue-400">
                       <Zap className="w-4 h-4" />
                       <span>Cross-Chain Features</span>
                     </div>
-                    <ul className="text-xs text-gray-500 mt-2 space-y-1">
+                    <ul className="text-xs text-gray-600 dark:text-gray-500 mt-2 space-y-1">
                       <li>• Bridge & Execute loan disbursements</li>
                       <li>• Unified balance tracking</li>
                       <li>• Cross-chain repayment flows</li>
@@ -712,13 +712,13 @@ export default function Loans() {
       {activeTab === "request" && (
         <div className="max-w-2xl">
           <div className="card-bordered">
-            <h2 className="text-lg font-semibold text-gray-100 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">
               Request a Loan
             </h2>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
                   Loan Amount (USDT)
                 </label>
                 <input
@@ -731,7 +731,7 @@ export default function Loans() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
                   Initial Collateral Percentage
                 </label>
                 <input
@@ -743,7 +743,7 @@ export default function Loans() {
                   max="100"
                   className="input"
                 />
-                <p className="text-xs text-gray-600 mt-2">
+                <p className="text-xs text-gray-600 dark:text-gray-500 mt-2">
                   Collateral decreases by 8% per backer (minimum 20%)
                 </p>
               </div>
@@ -757,22 +757,22 @@ export default function Loans() {
               </button>
 
               {error && (
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                  <p className="text-sm text-red-400">{error}</p>
+                <div className="p-3 rounded-lg bg-red-100/50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+                  <p className="text-sm text-red-700 dark:text-red-400">{error}</p>
                 </div>
               )}
 
               {writeError && (
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                  <p className="text-sm text-red-400">
+                <div className="p-3 rounded-lg bg-red-100/50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+                  <p className="text-sm text-red-700 dark:text-red-400">
                     Transaction failed: {writeError.message}
                   </p>
                 </div>
               )}
 
               {isSuccess && (
-                <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                  <p className="text-sm text-emerald-400">
+                <div className="p-3 rounded-lg bg-emerald-100/50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+                  <p className="text-sm text-emerald-700 dark:text-emerald-400">
                     Loan request submitted successfully!
                   </p>
                 </div>
@@ -787,15 +787,15 @@ export default function Loans() {
         <div>
           {!isConnected ? (
             <div className="card text-center py-12">
-              <Coins className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-              <p className="text-sm text-gray-400">
+              <Coins className="w-12 h-12 text-gray-600 dark:text-gray-700 mx-auto mb-4" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Connect your wallet to view your loans
               </p>
             </div>
           ) : (
             <div className="card text-center py-12">
-              <Coins className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-              <p className="text-sm text-gray-400">No active loans found</p>
+              <Coins className="w-12 h-12 text-gray-600 dark:text-gray-700 mx-auto mb-4" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">No active loans found</p>
             </div>
           )}
         </div>

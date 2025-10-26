@@ -195,48 +195,48 @@ export default function YieldPool() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold text-gray-100">Yield Pool</h1>
-        <p className="text-sm text-gray-500">
+        <h1 className="text-3xl font-semibold text-gray-900 dark:text-gray-100">Yield Pool</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-500">
           Earn passive yields by providing liquidity to the protocol
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="stat-card hover:border-gray-800">
+        <div className="stat-card hover:border-gray-300 dark:hover:border-gray-800">
           <div className="flex items-center justify-between">
             <span className="stat-label">Total Value Locked</span>
-            <DollarSign className="w-4 h-4 text-gray-600" />
+            <DollarSign className="w-4 h-4 text-gray-500 dark:text-gray-600" />
           </div>
           <div className="stat-value">
             ${tvl.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </div>
 
-        <div className="stat-card hover:border-gray-800">
+        <div className="stat-card hover:border-gray-300 dark:hover:border-gray-800">
           <div className="flex items-center justify-between">
             <span className="stat-label">Your Deposit</span>
-            <TrendingUp className="w-4 h-4 text-gray-600" />
+            <TrendingUp className="w-4 h-4 text-gray-500 dark:text-gray-600" />
           </div>
           <div className="stat-value">
             ${parseFloat(userBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
         </div>
 
-        <div className="stat-card hover:border-gray-800">
+        <div className="stat-card hover:border-gray-300 dark:hover:border-gray-800">
           <div className="flex items-center justify-between">
             <span className="stat-label">Cross-Chain Yield</span>
-            <Globe className="w-4 h-4 text-blue-400" />
+            <Globe className="w-4 h-4 text-blue-600 dark:text-blue-400" />
           </div>
           <div className="stat-value">
             ${crossChainStats.totalYield.toLocaleString()}
           </div>
         </div>
 
-        <div className="stat-card hover:border-gray-800">
+        <div className="stat-card hover:border-gray-300 dark:hover:border-gray-800">
           <div className="flex items-center justify-between">
             <span className="stat-label">Active Strategies</span>
-            <Layers className="w-4 h-4 text-emerald-400" />
+            <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           </div>
           <div className="stat-value">
             {crossChainStats.activeStrategies}
@@ -246,36 +246,36 @@ export default function YieldPool() {
 
       {/* Cross-Chain Status */}
       {nexus && (
-        <div className="card border-blue-900/20 bg-blue-950/10">
+        <div className="card border-blue-900/20 bg-blue-100/50 dark:bg-blue-950/10">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-100 flex items-center space-x-2">
-              <Globe className="w-5 h-5 text-blue-400" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center space-x-2">
+              <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               <span>Cross-Chain Yield Farming</span>
             </h3>
-            <div className="flex items-center space-x-2 text-sm text-emerald-400">
-              <div className="w-2 h-2 rounded-full bg-emerald-400" />
+            <div className="flex items-center space-x-2 text-sm text-emerald-600 dark:text-emerald-400">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
               <span>Nexus Connected</span>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-2xl font-semibold text-gray-100">
+            <div className="text-center p-4 bg-gray-100 dark:bg-gray-900/50 rounded-lg">
+              <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                 {crossChainStats.crossChainDeposits}
               </div>
-              <div className="text-xs text-gray-500 mt-1">Cross-Chain Deposits</div>
+              <div className="text-xs text-gray-600 dark:text-gray-500 mt-1">Cross-Chain Deposits</div>
             </div>
-            <div className="text-center p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-2xl font-semibold text-gray-100">
+            <div className="text-center p-4 bg-gray-100 dark:bg-gray-900/50 rounded-lg">
+              <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                 {crossChainStats.activeStrategies}
               </div>
-              <div className="text-xs text-gray-500 mt-1">Active Strategies</div>
+              <div className="text-xs text-gray-600 dark:text-gray-500 mt-1">Active Strategies</div>
             </div>
-            <div className="text-center p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-2xl font-semibold text-gray-100">
+            <div className="text-center p-4 bg-gray-100 dark:bg-gray-900/50 rounded-lg">
+              <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                 ${crossChainStats.totalYield.toLocaleString()}
               </div>
-              <div className="text-xs text-gray-500 mt-1">Total Yield Earned</div>
+              <div className="text-xs text-gray-600 dark:text-gray-500 mt-1">Total Yield Earned</div>
             </div>
           </div>
         </div>
@@ -286,14 +286,14 @@ export default function YieldPool() {
         {/* Deposit/Withdraw Interface */}
         <div className="lg:col-span-2">
           <div className="card-bordered">
-            <div className="flex space-x-1 border-b border-gray-900 mb-6">
+            <div className="flex space-x-1 border-b border-gray-200 dark:border-gray-900 mb-6">
               {['deposit', 'withdraw'].map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`flex-1 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
-                    ? 'border-blue-500 text-gray-100'
-                    : 'border-transparent text-gray-500 hover:text-gray-300'
+                    ? 'border-blue-500 text-gray-900 dark:text-gray-100'
+                    : 'border-transparent text-gray-600 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'
                     }`}
                 >
                   {tab === 'deposit' ? (
@@ -315,10 +315,10 @@ export default function YieldPool() {
               <div className="space-y-5">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-400">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">
                       Deposit Amount (USDT)
                     </label>
-                    <span className="text-xs text-gray-600 font-mono">
+                    <span className="text-xs text-gray-600 dark:text-gray-500 font-mono">
                       Balance: ${parseFloat(usdtBalance).toFixed(2)}
                     </span>
                   </div>
@@ -331,7 +331,7 @@ export default function YieldPool() {
                   />
                   <button
                     onClick={() => setDepositAmount(usdtBalance)}
-                    className="text-xs text-blue-400 hover:text-blue-300 mt-2 transition-colors"
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-2 transition-colors"
                   >
                     Max
                   </button>
@@ -340,7 +340,7 @@ export default function YieldPool() {
                 {/* Cross-Chain Options */}
                 {nexus && (
                   <div className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-400">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">
                       Target Chain for Yield Farming
                     </label>
                     <select
@@ -352,12 +352,12 @@ export default function YieldPool() {
                       <option value="polygon">Polygon (12.3% APY)</option>
                       <option value="arbitrum">Arbitrum (10.7% APY)</option>
                     </select>
-                    <div className="p-3 bg-blue-950/20 border border-blue-900/30 rounded-lg">
-                      <div className="flex items-center space-x-2 text-sm text-blue-400 mb-2">
+                    <div className="p-3 bg-blue-100/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/30 rounded-lg">
+                      <div className="flex items-center space-x-2 text-sm text-blue-700 dark:text-blue-400 mb-2">
                         <Zap className="w-4 h-4" />
                         <span>Cross-Chain Yield Optimization</span>
                       </div>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-600 dark:text-gray-500">
                         Your deposit will be automatically optimized across multiple chains for maximum yield
                       </p>
                     </div>
@@ -404,10 +404,10 @@ export default function YieldPool() {
               <div className="space-y-5">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-400">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-400">
                       Withdraw Shares
                     </label>
-                    <span className="text-xs text-gray-600 font-mono">
+                    <span className="text-xs text-gray-600 dark:text-gray-500 font-mono">
                       Available: {parseFloat(userShares).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                   </div>
@@ -420,7 +420,7 @@ export default function YieldPool() {
                   />
                   <button
                     onClick={() => setWithdrawShares(userShares)}
-                    className="text-xs text-blue-400 hover:text-blue-300 mt-2 transition-colors"
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mt-2 transition-colors"
                   >
                     Max ({parseFloat(userShares).toFixed(2)} shares)
                   </button>
@@ -441,20 +441,20 @@ export default function YieldPool() {
         {/* Pool Information */}
         <div className="space-y-6">
           <div className="card">
-            <h3 className="text-sm font-semibold text-gray-100 mb-4">Pool Information</h3>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Pool Information</h3>
             <div className="space-y-3">
               <div className="flex items-start space-x-3">
                 <div className="w-1 h-1 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
                 <div>
-                  <div className="text-sm font-medium text-gray-300">Share-Based System</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Fair yield distribution for all depositors</div>
+                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Share-Based System</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-500 mt-0.5">Fair yield distribution for all depositors</div>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
                 <div className="w-1 h-1 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
                 <div>
-                  <div className="text-sm font-medium text-gray-300">Withdrawal Lock</div>
-                  <div className="text-xs text-gray-500 mt-0.5">
+                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Withdrawal Lock</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-500 mt-0.5">
                     Withdrawals may require waiting period depending on pool liquidity
                   </div>
                 </div>
@@ -462,8 +462,8 @@ export default function YieldPool() {
               <div className="flex items-start space-x-3">
                 <div className="w-1 h-1 rounded-full bg-blue-500 mt-2 flex-shrink-0" />
                 <div>
-                  <div className="text-sm font-medium text-gray-300">Security & Audits</div>
-                  <div className="text-xs text-gray-500 mt-0.5">
+                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Security & Audits</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-500 mt-0.5">
                     Contract audited and protected by multi-sig governance
                   </div>
                 </div>
@@ -473,15 +473,15 @@ export default function YieldPool() {
 
           {/* Withdrawal Request Info */}
           {withdrawalRequest.shares > 0n && (
-            <div className="card border-yellow-600/50 bg-yellow-950/10">
+            <div className="card border-yellow-600/50 bg-yellow-100/50 dark:bg-yellow-950/10">
               <div className="flex items-center space-x-2 mb-2">
-                <AlertCircle className="w-4 h-4 text-yellow-400" />
-                <span className="text-sm text-yellow-400 font-medium">Pending Withdrawal Request</span>
+                <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                <span className="text-sm text-yellow-700 dark:text-yellow-400 font-medium">Pending Withdrawal Request</span>
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-gray-600 dark:text-gray-400">
                 Shares Requested: {formatUnits(withdrawalRequest.shares, 6)}
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-gray-600 dark:text-gray-400">
                 Requested At: {new Date(Number(withdrawalRequest.requestTime) * 1000).toLocaleString()}
               </div>
               {canWithdraw && (

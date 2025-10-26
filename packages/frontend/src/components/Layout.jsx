@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useNexus } from '../contexts/NexusContext';
 import {
   LayoutDashboard,
   Coins,
@@ -14,7 +13,7 @@ import {
 } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 
-const Navigation = ({ mobile = false, onClose = () => { } }) => {
+const Navigation = ({ mobile = false, onClose = () => {} }) => {
   const location = useLocation();
 
   const navItems = [
@@ -55,7 +54,7 @@ const Navigation = ({ mobile = false, onClose = () => { } }) => {
 
 export default function Layout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { nexus } = useNexus();
+
   return (
     <div className="min-h-screen bg-white dark:bg-black">
       {/* Header */}
@@ -88,21 +87,11 @@ export default function Layout() {
                   largeScreen: true,
                 }}
               />
-              {/* Nexus Status */}
-              {nexus ? (
-                <span className="text-green-400 text-sm font-mono">
-                  Nexus Connected
-                </span>
-              ) : (
-                <span className="text-gray-500 text-sm font-mono">
-                  Nexus Not Connected
-                </span>
-              )}
 
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2  text-gray-400 hover:text-gray-100 hover:bg-gray-900 transition-colors"
+                className="md:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-900 transition-colors"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -112,7 +101,7 @@ export default function Layout() {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-900 bg-black">
+          <div className="md:hidden border-t border-gray-200 dark:border-gray-900 bg-white dark:bg-black">
             <div className="px-4 py-3">
               <Navigation mobile onClose={() => setMobileMenuOpen(false)} />
             </div>
@@ -128,16 +117,16 @@ export default function Layout() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-900 mt-20">
+      <footer className="border-t border-gray-200 dark:border-gray-900 mt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
             <div className="flex items-center space-x-2 text-sm">
               <div className="status-dot" />
-              <span className="text-gray-500 font-mono">
+              <span className="text-gray-600 dark:text-gray-500 font-mono">
                 Sepolia Testnet
               </span>
             </div>
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-gray-600 dark:text-gray-600">
               Prism Finance v1.0
             </p>
           </div>

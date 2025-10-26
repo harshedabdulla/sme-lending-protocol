@@ -29,8 +29,8 @@ const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake, isProcessi
 
   return (
     <div className="card-bordered">
-      <h3 className="text-lg font-semibold text-gray-100 mb-6 flex items-center space-x-2">
-        <Lock className="w-5 h-5 text-gray-500" />
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center space-x-2">
+        <Lock className="w-5 h-5 text-gray-600 dark:text-gray-500" />
         <span>Staking</span>
       </h3>
 
@@ -38,22 +38,22 @@ const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake, isProcessi
         <div className="stat-card">
           <span className="stat-label">Staked</span>
           <div className="stat-value text-xl">{formatUnits(stakedAmount, 18)}</div>
-          <span className="text-xs text-gray-600 font-mono">SMEDAO</span>
+          <span className="text-xs text-gray-600 dark:text-gray-500 font-mono">SMEDAO</span>
         </div>
         <div className="stat-card">
           <span className="stat-label">Unstaking</span>
-          <div className="stat-value text-xl text-amber-400">{formatUnits(unstakeAmount, 18)}</div>
-          <span className="text-xs text-gray-600 font-mono">SMEDAO</span>
+          <div className="stat-value text-xl text-amber-500 dark:text-amber-400">{formatUnits(unstakeAmount, 18)}</div>
+          <span className="text-xs text-gray-600 dark:text-gray-500 font-mono">SMEDAO</span>
         </div>
       </div>
 
       {unstakeAmount > 0n && (
-        <div className="mb-6 card-bordered border-amber-900/20 bg-amber-950/10">
+        <div className="mb-6 card-bordered border-amber-900/20 bg-amber-100/50 dark:bg-amber-950/10">
           <div className="flex items-start space-x-3">
-            <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium text-amber-400 mb-1">Unstake Request Pending</p>
-              <p className="text-xs text-gray-400">
+              <p className="text-sm font-medium text-amber-700 dark:text-amber-400 mb-1">Unstake Request Pending</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 {canUnstake
                   ? 'Available for withdrawal now'
                   : `Available in ${Math.ceil((Number(unstakeAvailableAt) - Date.now() / 1000) / 60)} min`}
@@ -63,20 +63,20 @@ const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake, isProcessi
         </div>
       )}
 
-      <div className="flex space-x-1 border-b border-gray-900 mb-6">
+      <div className="flex space-x-1 border-b border-gray-200 dark:border-gray-900 mb-6">
         <button
           onClick={() => setAction('stake')}
           className={`flex-1 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${action === 'stake'
-            ? 'border-blue-500 text-gray-100'
-            : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+            ? 'border-blue-500 text-gray-900 dark:text-gray-100'
+            : 'border-transparent text-gray-600 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`}
         >
           Stake
         </button>
         <button
           onClick={() => setAction('unstake')}
           className={`flex-1 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${action === 'unstake'
-            ? 'border-blue-500 text-gray-100'
-            : 'border-transparent text-gray-500 hover:text-gray-300'}`}
+            ? 'border-blue-500 text-gray-900 dark:text-gray-100'
+            : 'border-transparent text-gray-600 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-300'}`}
         >
           Unstake
         </button>
@@ -122,13 +122,13 @@ const StakeCard = ({ stakeInfo, onStake, onUnstake, onRequestUnstake, isProcessi
         )}
 
         {isProcessing && (
-          <div className="text-xs text-blue-400 text-center">
+          <div className="text-xs text-blue-600 dark:text-blue-400 text-center">
             Transaction pending... Check MetaMask
           </div>
         )}
 
         {isSuccess && (
-          <div className="text-xs text-emerald-400 text-center">Transaction confirmed!</div>
+          <div className="text-xs text-emerald-600 dark:text-emerald-400 text-center">Transaction confirmed!</div>
         )}
       </div>
     </div>
@@ -206,9 +206,9 @@ export default function MyAccount() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="card text-center max-w-md py-12">
-          <User className="w-12 h-12 text-gray-700 mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-gray-100 mb-2">Connect Wallet</h2>
-          <p className="text-sm text-gray-400">Connect your wallet to view your account details</p>
+          <User className="w-12 h-12 text-gray-600 dark:text-gray-700 mx-auto mb-4" />
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Connect Wallet</h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Connect your wallet to view your account details</p>
         </div>
       </div>
     );
@@ -218,59 +218,59 @@ export default function MyAccount() {
     <div className="space-y-8">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold text-gray-100">Account</h1>
-        <p className="text-sm text-gray-500">Manage your DAO membership, staking, and cross-chain activity</p>
+        <h1 className="text-3xl font-semibold text-gray-900 dark:text-gray-100">Account</h1>
+        <p className="text-sm text-gray-600 dark:text-gray-500">Manage your DAO membership, staking, and cross-chain activity</p>
       </div>
       {/* Account Status */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="card">
-          <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center space-x-2">
-            <Wallet className="w-5 h-5 text-blue-400" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
+            <Wallet className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             <span>Wallet Status</span>
           </h3>
 
           {isConnected ? (
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="text-sm text-emerald-400">Connected</span>
+                <div className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
+                <span className="text-sm text-emerald-600 dark:text-emerald-400">Connected</span>
               </div>
-              <div className="text-sm text-gray-400 font-mono">
+              <div className="text-sm text-gray-700 dark:text-gray-400 font-mono">
                 {address?.slice(0, 6)}...{address?.slice(-4)}
               </div>
             </div>
           ) : (
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 rounded-full bg-gray-500" />
-                <span className="text-sm text-gray-500">Not Connected</span>
+                <div className="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500" />
+                <span className="text-sm text-gray-600 dark:text-gray-500">Not Connected</span>
               </div>
-              <p className="text-sm text-gray-500">Connect your wallet to get started</p>
+              <p className="text-sm text-gray-600 dark:text-gray-500">Connect your wallet to get started</p>
             </div>
           )}
         </div>
 
         <div className="card">
-          <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center space-x-2">
-            <Globe className="w-5 h-5 text-blue-400" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
+            <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             <span>Nexus Status</span>
           </h3>
 
           {nexus ? (
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="text-sm text-emerald-400">Nexus Connected</span>
+                <div className="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400" />
+                <span className="text-sm text-emerald-600 dark:text-emerald-400">Nexus Connected</span>
               </div>
-              <p className="text-sm text-gray-500">Cross-chain features enabled</p>
+              <p className="text-sm text-gray-600 dark:text-gray-500">Cross-chain features enabled</p>
             </div>
           ) : (
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 rounded-full bg-gray-500" />
-                <span className="text-sm text-gray-500">Nexus Not Connected</span>
+                <div className="w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500" />
+                <span className="text-sm text-gray-600 dark:text-gray-500">Nexus Not Connected</span>
               </div>
-              <p className="text-sm text-gray-500">Connect wallet to enable Nexus</p>
+              <p className="text-sm text-gray-600 dark:text-gray-500">Connect wallet to enable Nexus</p>
             </div>
           )}
         </div>
@@ -279,31 +279,31 @@ export default function MyAccount() {
       {/* Membership Status */}
       <div className="card-bordered">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-gray-100">Membership Status</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Membership Status</h2>
           <span className="badge-success">Active Member</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="stat-card hover:border-gray-800">
+          <div className="stat-card hover:border-gray-300 dark:hover:border-gray-800">
             <div className="flex items-center justify-between">
               <span className="stat-label">Reputation Score</span>
-              <Award className="w-4 h-4 text-gray-600" />
+              <Award className="w-4 h-4 text-gray-500 dark:text-gray-600" />
             </div>
             <div className="stat-value">{/* pull from contracts or user profile */}850/1000</div>
           </div>
 
-          <div className="stat-card hover:border-gray-800">
+          <div className="stat-card hover:border-gray-300 dark:hover:border-gray-800">
             <div className="flex items-center justify-between">
               <span className="stat-label">Voting Power</span>
-              <TrendingUp className="w-4 h-4 text-gray-600" />
+              <TrendingUp className="w-4 h-4 text-gray-500 dark:text-gray-600" />
             </div>
-            <div className="stat-value text-gray-100">{parseFloat(votingPower).toFixed(2)}</div>
+            <div className="stat-value text-gray-900 dark:text-gray-100">{parseFloat(votingPower).toFixed(2)}</div>
           </div>
 
-          <div className="stat-card hover:border-gray-800">
+          <div className="stat-card hover:border-gray-300 dark:hover:border-gray-800">
             <div className="flex items-center justify-between">
               <span className="stat-label">Member Since</span>
-              <Shield className="w-4 h-4 text-gray-600" />
+              <Shield className="w-4 h-4 text-gray-500 dark:text-gray-600" />
             </div>
             <div className="stat-value text-lg">Genesis</div>
           </div>
@@ -313,8 +313,8 @@ export default function MyAccount() {
       {/* Balances & Staking */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card">
-          <h3 className="text-lg font-semibold text-gray-100 mb-6 flex items-center space-x-2">
-            <Coins className="w-5 h-5 text-gray-500" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center space-x-2">
+            <Coins className="w-5 h-5 text-gray-600 dark:text-gray-500" />
             <span>Token Balances</span>
           </h3>
 
@@ -322,7 +322,7 @@ export default function MyAccount() {
             <div className="stat-card">
               <div className="flex items-center justify-between mb-1">
                 <span className="stat-label">Prism Token</span>
-                <span className="text-xs text-gray-600 font-mono">Governance</span>
+                <span className="text-xs text-gray-600 dark:text-gray-500 font-mono">Governance</span>
               </div>
               <div className="stat-value">
                 {parseFloat(tokenBalance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -350,24 +350,24 @@ export default function MyAccount() {
 
       {/* Cross-Chain Activity */}
       {nexus && (
-        <div className="card border-blue-900/20 bg-blue-950/10">
-          <h3 className="text-lg font-semibold text-gray-100 mb-4 flex items-center space-x-2">
-            <Globe className="w-5 h-5 text-blue-400" />
+        <div className="card border-blue-900/20 bg-blue-100/50 dark:bg-blue-950/10">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-2">
+            <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             <span>Cross-Chain Activity</span>
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-2xl font-semibold text-gray-100">{crossChainStats.crossChainProposals}</div>
-              <div className="text-xs text-gray-500 mt-1">Cross-Chain Proposals</div>
+            <div className="text-center p-4 bg-gray-100 dark:bg-gray-900/50 rounded-lg">
+              <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{crossChainStats.crossChainProposals}</div>
+              <div className="text-xs text-gray-600 dark:text-gray-500 mt-1">Cross-Chain Proposals</div>
             </div>
-            <div className="text-center p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-2xl font-semibold text-gray-100">{crossChainStats.activeGovernance}</div>
-              <div className="text-xs text-gray-500 mt-1">Active Governance</div>
+            <div className="text-center p-4 bg-gray-100 dark:bg-gray-900/50 rounded-lg">
+              <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{crossChainStats.activeGovernance}</div>
+              <div className="text-xs text-gray-600 dark:text-gray-500 mt-1">Active Governance</div>
             </div>
-            <div className="text-center p-4 bg-gray-900/50 rounded-lg">
-              <div className="text-2xl font-semibold text-gray-100">{/* add volume if available */}0</div>
-              <div className="text-xs text-gray-500 mt-1">Total Volume</div>
+            <div className="text-center p-4 bg-gray-100 dark:bg-gray-900/50 rounded-lg">
+              <div className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{/* add volume if available */}0</div>
+              <div className="text-xs text-gray-600 dark:text-gray-500 mt-1">Total Volume</div>
             </div>
           </div>
         </div>
